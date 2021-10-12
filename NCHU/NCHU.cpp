@@ -1,6 +1,7 @@
 #include <GL/glut.h>
 #define DrawPolygon(X) drawPolygon(X, sizeof(X) / sizeof(X[0]))
-
+#define WIDTH 1920.0
+#define HEIGHT 1080.0
 
 void background();
 void Display(void);
@@ -11,7 +12,7 @@ int main(int argc, char* argv[]) {
 	glutInitWindowPosition(100, 100);	//set the position of Window
 	glutInitWindowSize(1920, 1080);		//set the size of Window
 	glutCreateWindow("Square");			//set the title of Window
-		glutDisplayFunc(Display);
+	glutDisplayFunc(Display);
 	glutMainLoop();
 	return 0;
 }
@@ -30,7 +31,7 @@ void background() {
 class NchuCh {
 
 private:
-	float origin[2] = { 960.0, 540.0 };
+	float origin[2];
 	void drawPolygon(int (*data)[2], int size) {
 		float bufxy[2] = { 0.0, 0.0};
 		glBegin(GL_POLYGON);
@@ -41,8 +42,8 @@ private:
 		}
 		glEnd();
 	}
-	
-	//ch1_1
+
+	//ch_1
 	int ch_1_1[4][2] = {
 		{213, 375},
 		{188, 389},
@@ -158,21 +159,125 @@ private:
 		DrawPolygon(ch_1_14);
 	}
 
+	//ch_2
+	int ch_2_1[6][2] = {
+		{461, 371},
+		{458, 385},
+		{462, 394},
+		{478, 403},
+		{500, 398},
+		{501, 390},
+	};
+	int ch_2_2[9][2] = {
+		{500, 398},
+		{478, 403},
+		{433, 415},
+		{429, 412},
+		{414, 419},
+		{409, 430},
+		{413, 439},
+		{422, 441},
+		{477, 421},
+	};
+	int ch_2_3[5][2] = {
+		{500, 398},
+		{477, 421},
+		{526, 417},
+		{526, 403},
+		{518, 397},
+	};
+	int ch_2_4[4][2] = {
+		{477, 421},
+		{439, 454},
+		{471, 443},
+		{500, 416},
+	};
+	int ch_2_5[4][2] = {
+		{471, 443},
+		{439, 454},
+		{438, 471},
+		{447, 476},
+	};
+	int ch_2_6[4][2] = {
+		{471, 443},
+		{447, 476},
+		{514, 437},
+		{518, 430},
+	};
+	int ch_2_7[5][2] = {
+		{518, 430},
+		{514, 437},
+		{496, 483},
+		{517, 462},
+		{532, 438},
+	};
+	int ch_2_8[4][2] = {
+		{514, 437},
+		{462, 498},
+		{485, 496},
+		{496, 483},
+	};
+	int ch_2_9[7][2] = {
+		{485, 496},
+		{462, 498},
+		{409, 504},
+		{417, 515},
+		{428, 522},
+		{438, 523},
+		{454, 517},
+	};
+	int ch_2_10[5][2] = {
+		{485, 496},
+		{454, 517},
+		{499, 512},
+		{508, 508},
+		{518, 495},
+	};
+	int ch_2_11[6][2] = {
+		{518, 495},
+		{508, 508},
+		{554, 512},
+		{558, 507},
+		{555, 496},
+		{541, 494},
+	};
+	void display_ch_2() {
+		DrawPolygon(ch_2_1);
+		DrawPolygon(ch_2_2);
+		DrawPolygon(ch_2_3);
+		DrawPolygon(ch_2_4);
+		DrawPolygon(ch_2_5);
+		DrawPolygon(ch_2_6);
+		DrawPolygon(ch_2_7);
+		DrawPolygon(ch_2_8);
+		DrawPolygon(ch_2_9);
+		DrawPolygon(ch_2_10);
+		DrawPolygon(ch_2_11);
+	}
 
 public:
-	NchuCh() {
-
+	NchuCh(float width, float height) {
+		origin[0] = width / 2;
+		origin[1] = height / 2;
 	}
 	void display_ch() {
+		glColor3f(0.007, 0.4375, 0.589);
 		display_ch_1();
+		display_ch_2();
 	}
 };
 
+void Reshape() {
+	glViewport(0, 0, WIDTH, HEIGHT);
+	glOrtho(0.0f, WIDTH, 0.0f, HEIGHT, 0.0f, 0.0f);
+}
 
 void Display(void) {
-	NchuCh word_ch;
+	NchuCh word_ch(WIDTH, HEIGHT);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, WIDTH, HEIGHT);
+	glOrtho(0.0f, WIDTH, 0.0f, HEIGHT, 0.0f, 0.0f);
 	background();
 	word_ch.display_ch();
 	glutSwapBuffers();
