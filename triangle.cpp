@@ -3,12 +3,12 @@
 void Display(void) {
 	glPushMatrix();
 	glBegin(GL_TRIANGLES);		//start to draw a triangle
-	glColor3f(1.0f, 0.0f, 0.0f);	//set the output color to red
-	glVertex2f(0.0f, 1.0f);		//(x1,y1)=(0,1)
-	glColor3f(0.0f, 1.0f, 0.0f);	//set the output color to green
-	glVertex2f(0.87f, -0.5f);	//(x2,x2)=(0.87,-0.5)
-	glColor3f(0.0f, 0.0f, 1.0f);	//set the output color to blue
-	glVertex2f(-0.87f, -0.5f);	//(x3,y3)=(-0.87,-0.5)
+		glColor3f(1.0f, 0.0f, 0.0f);	//set the output color to red
+		glVertex2f(0.0f, 1.0f);		//(x1,y1)=(0,1)
+		glColor3f(0.0f, 1.0f, 0.0f);	//set the output color to green
+		glVertex2f(0.87f, -0.5f);	//(x2,x2)=(0.87,-0.5)
+		glColor3f(0.0f, 0.0f, 1.0f);	//set the output color to blue
+		glVertex2f(-0.87f, -0.5f);	//(x3,y3)=(-0.87,-0.5)
 	glEnd();			//finish drawing a triangle
 	glPopMatrix();
 	glutSwapBuffers();
