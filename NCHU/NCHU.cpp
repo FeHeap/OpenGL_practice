@@ -9,7 +9,7 @@ void Display(void);
 int main(int argc, char* argv[]) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
-	glutInitWindowPosition(100, 100);	//set the position of Window
+	glutInitWindowPosition(0, 0);	//set the position of Window
 	glutInitWindowSize(1920, 1080);		//set the size of Window
 	glutCreateWindow("Square");			//set the title of Window
 	glutDisplayFunc(Display);
@@ -255,6 +255,108 @@ private:
 		DrawPolygon(ch_2_11);
 	}
 
+	//ch_3
+	int ch_3_1[9][2] = {
+		{596, 397},
+		{589, 411},
+		{591, 430},
+		{601, 451},
+		{608, 461},
+		{617, 463},
+		{610, 415},
+		{607, 406},
+		{603, 399},
+	};
+	int ch_3_2[4][2] = {
+		{603, 399},
+		{607, 406},
+		{621, 407},
+		{624, 393},
+	};
+	int ch_3_3[5][2] = {
+		{624, 393},
+		{621, 407},
+		{629, 413},
+		{647, 405},
+		{642, 391},
+	};
+	int ch_3_4[4][2] = {
+		{642, 391},
+		{647, 405},
+		{673, 394},
+		{677, 385},
+	};
+	int ch_3_5[6][2] = {
+		{677, 385},
+		{673, 394},
+		{740, 390},
+		{734, 382},
+		{724, 381},
+		{693, 382},
+	};
+	int ch_3_6[6][2] = {
+		{724, 381},
+		{705, 404},
+		{698, 413},
+		{700, 422},
+		{734, 402},
+		{740, 390},
+	};
+	int ch_3_7[5][2] = {
+		{700, 422},
+		{698, 413},
+		{681, 415},
+		{678, 428},
+		{691, 428},
+	};
+	int ch_3_8[5][2] = {
+		{689, 357},
+		{680, 362},
+		{676, 388},
+		{693, 386},
+		{694, 363},
+	};
+	int ch_3_9[4][2] = {
+		{684, 393},
+		{681, 415},
+		{692, 415},
+		{693, 390},
+	};
+	int ch_3_10[10][2] = {
+		{678, 428},
+		{669, 430},
+		{656, 438},
+		{647, 444},
+		{645, 452},
+		{646, 460},
+		{666, 454},
+		{676, 451},
+		{692, 436},
+		{691, 428},
+	};
+	int ch_3_11[7][2] = {
+		{692, 436},
+		{676, 451},
+		{675, 563},
+		{677, 595},
+		{687, 587},
+		{692, 542},
+		{692, 450},
+	};
+	void display_ch_3() {
+		DrawPolygon(ch_3_1);
+		DrawPolygon(ch_3_2);
+		DrawPolygon(ch_3_3);
+		DrawPolygon(ch_3_4);
+		DrawPolygon(ch_3_5);
+		DrawPolygon(ch_3_6);
+		DrawPolygon(ch_3_7);
+		DrawPolygon(ch_3_8);
+		DrawPolygon(ch_3_9);
+		DrawPolygon(ch_3_10);
+		DrawPolygon(ch_3_11);
+	}
+
 public:
 	NchuCh(float width, float height) {
 		origin[0] = width / 2;
@@ -264,6 +366,7 @@ public:
 		glColor3f(0.007, 0.4375, 0.589);
 		display_ch_1();
 		display_ch_2();
+		display_ch_3();
 	}
 };
 
