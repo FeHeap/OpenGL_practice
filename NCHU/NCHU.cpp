@@ -11,20 +11,32 @@
 #define WIDTH 1920.0
 #define HEIGHT 1080.0
 
-void background();
+void init(void);
+void background(void);
 void Display(void);
+void Reshape(int, int);
 
 int main(int argc, char* argv[]) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowPosition(0, 0);		// set the position of Window
 	glutInitWindowSize(1920, 1080);		// set the size of Window
-	glutCreateWindow("Square");			// set the title of Window
+	glutCreateWindow("NCHU");			// set the title of Window
+	init();
 	glutDisplayFunc(Display);
+	glutReshapeFunc(Reshape);
 	glutMainLoop();
 	return 0;
 }
 
+void init() {
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+}
+
+void Reshape(int width, int height) {
+	glViewport(0, 0, (GLsizei)WIDTH, (GLsizei)HEIGHT);
+	glOrtho(0.0, WIDTH, 0.0, HEIGHT, 0.0, 0.0);
+}
 
 void background() {
 	glColor3f(background_color_R, background_color_G, background_color_B);
@@ -898,7 +910,7 @@ private:
 		{1323, 445},
 		{1316, 452},
 		{1327, 448},
-		{1331, 445},	
+		{1331, 445},
 	};
 	float ch_6_19[5][2] = {
 		{1282, 419},
@@ -1457,7 +1469,7 @@ public:
 		DrawPolygon(logo_cut_right);
 		DrawPolygon(logo_cut_above);
 		DrawPolygon(logo_cut_below);
-		for (int i = 0; i < sizeof(logo_cut_naka)/sizeof(logo_cut_naka[0]); i++) {
+		for (int i = 0; i < sizeof(logo_cut_naka) / sizeof(logo_cut_naka[0]); i++) {
 			DrawPolygon(logo_cut_naka[i]);
 		}
 	}
@@ -1471,12 +1483,12 @@ private:
 	void drawTriangles(float(*data)[3][2], int size) {
 		for (int i = 0; i < size; i++) {
 			glBegin(GL_TRIANGLES);
-				for (int j = 0; j < 3; j++) {
-					glVertex2fv(data[i][j]);
-				}
+			for (int j = 0; j < 3; j++) {
+				glVertex2fv(data[i][j]);
+			}
 			glEnd();
 		}
-		
+
 	}
 
 	// National
@@ -2053,14 +2065,10 @@ public:
 } word_en(WIDTH, HEIGHT);
 
 void Display(void) {
-	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, WIDTH, HEIGHT);
-	glOrtho(0.0f, WIDTH, 0.0f, HEIGHT, 0.0f, 0.0f);
 	background();
 	word_ch.display_ch();
 	word_ch.display_logo();
 	word_en.display_en();
 	glutSwapBuffers();
 }
-
