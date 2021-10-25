@@ -60,7 +60,6 @@ void mouse(int button, int state, int x, int y) {
 			spinZ = 1.0;
 			glutIdleFunc(spinDisplay);
 		}
-		glutIdleFunc(spinDisplay);
 		break;
 	case GLUT_MIDDLE_BUTTON:
 		if (state == GLUT_DOWN) {
