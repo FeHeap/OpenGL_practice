@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
+#include <cstdio>
 
 #define DrawPolygon(X) drawPolygon(X, sizeof(X) / sizeof(X[0]))
 #define DrawTriangles(X) drawTriangles(X, sizeof(X) / sizeof(X[0]))
@@ -86,6 +87,9 @@ void mouse(int button, int state, int x, int y) {
 
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
+	case '0':
+		drawMethod = '0';
+		break;
 	case '1':
 		drawMethod = '1';
 		break;
@@ -102,6 +106,7 @@ void keyboard(unsigned char key, int x, int y) {
 }
 
 void init() {
+	glewInit();
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glShadeModel(GL_FLAT);
 }
@@ -130,7 +135,7 @@ class NchuCh {
 private:
 
 	int origin[2];
-	void drawPolygon(int(*data)[2], int size) {
+	void drawPolygon(int (*data)[2], int size) {
 		if (drawMethod == '0') {
 			glBegin(GL_POLYGON);
 			for (int i = 0; i < size; i++) {
@@ -156,13 +161,37 @@ private:
 			glDisableClientState(GL_VERTEX_ARRAY);
 			free(offset);
 		}
-		else if (drawMethod == '3') {
-			//glMultiDrawArrays();
+	}
+
+	void displayMultiArray_ch() {
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_INT, 0, MultiDrawPointsXY);
+		glMultiDrawArrays(GL_POLYGON, MultiDrawStart, MultiDrawSize, 136);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+	void displayMultiArray_logo_out() {
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_INT, 0, &MultiDrawPointsXY[672]);
+		int temp_start[1] = { 0 };
+		glMultiDrawArrays(GL_POLYGON, temp_start, &MultiDrawSize[136], 1);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+	void displayMultiArray_logo_core() {
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_INT, 0, &MultiDrawPointsXY[676]);
+		int temp_start[1] = { 0 };
+		glMultiDrawArrays(GL_POLYGON, temp_start, &MultiDrawSize[137], 1);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+	void displayMultiArray_logo_cut() {
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_INT, 0, &MultiDrawPointsXY[699]);
+		int temp_start[25];
+		for (int i = 0; i < 25; i++) {
+			temp_start[i] = MultiDrawStart[138 + i] - 699;
 		}
-		else if (drawMethod == '4') {
-			//glMultiDrawElements();
-		}
-		
+		glMultiDrawArrays(GL_POLYGON, temp_start, &MultiDrawSize[138], 25);
+		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 
 	// ch_1
@@ -1390,10 +1419,22 @@ private:
 		{{1670, 516}, {1664, 522}, {1672, 539},},
 	};
 
+	GLint MultiDrawPointsXY[814][2];
+	int countPointIndex = 0;
+	GLint MultiDrawStart[163];
+	GLsizei MultiDrawSize[163];
+	int countGraphIndex = 0;
+
+
 	void polygon_xyConverse(int(*data)[2], int size) {
+		printf("%d %d %d\n", countGraphIndex, countPointIndex, size);
+		MultiDrawStart[countGraphIndex] = countPointIndex;
+		MultiDrawSize[countGraphIndex++] = size;
 		for (int i = 0; i < size; i++) {
 			data[i][0] = (data[i][0] - origin[0]);
 			data[i][1] = (origin[1] - data[i][1]);
+			MultiDrawPointsXY[countPointIndex][0] = data[i][0];
+			MultiDrawPointsXY[countPointIndex++][1] = data[i][1];
 		}
 	}
 
@@ -1555,26 +1596,49 @@ public:
 
 	void display_ch() {
 		glColor3f(0.007, 0.4375, 0.589);
-		display_ch_1();
-		display_ch_2();
-		display_ch_3();
-		display_ch_4();
-		display_ch_5();
-		display_ch_6();
+		switch (drawMethod) {
+		case '0':
+		case '1':
+		case '2':
+			display_ch_1();
+			display_ch_2();
+			display_ch_3();
+			display_ch_4();
+			display_ch_5();
+			display_ch_6();
+			break;
+		case '3':
+			displayMultiArray_ch();
+			break;
+		}
 	}
 
 	void display_logo() {
-		glColor3f(0.007, 0.4375, 0.589);
-		DrawPolygon(logo_out);
-		glColor3f(0.898, 0.102, 0.129);
-		DrawPolygon(logo_core);
-		glColor3f(background_color_R, background_color_G, background_color_B);
-		DrawPolygon(logo_cut_left);
-		DrawPolygon(logo_cut_right);
-		DrawPolygon(logo_cut_above);
-		DrawPolygon(logo_cut_below);
-		for (int i = 0; i < sizeof(logo_cut_naka) / sizeof(logo_cut_naka[0]); i++) {
-			DrawPolygon(logo_cut_naka[i]);
+		switch (drawMethod) {
+		case '0':
+		case '1':
+		case '2':
+			glColor3f(0.007, 0.4375, 0.589);
+			DrawPolygon(logo_out);
+			glColor3f(0.898, 0.102, 0.129);
+			DrawPolygon(logo_core);
+			glColor3f(background_color_R, background_color_G, background_color_B);
+			DrawPolygon(logo_cut_left);
+			DrawPolygon(logo_cut_right);
+			DrawPolygon(logo_cut_above);
+			DrawPolygon(logo_cut_below);
+			for (int i = 0; i < sizeof(logo_cut_naka) / sizeof(logo_cut_naka[0]); i++) {
+				DrawPolygon(logo_cut_naka[i]);
+			}
+			break;
+		case '3':
+			glColor3f(0.007, 0.4375, 0.589);
+			displayMultiArray_logo_out();
+			glColor3f(0.898, 0.102, 0.129);
+			displayMultiArray_logo_core();
+			glColor3f(background_color_R, background_color_G, background_color_B);
+			displayMultiArray_logo_cut();
+			break;
 		}
 	}
 
