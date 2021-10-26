@@ -1,5 +1,5 @@
+#include <GL/glew.h>
 #include <GL/glut.h>
-//#include <GL/glew.h>
 
 #define DrawPolygon(X) drawPolygon(X, sizeof(X) / sizeof(X[0]))
 #define DrawTriangles(X) drawTriangles(X, sizeof(X) / sizeof(X[0]))
@@ -9,8 +9,8 @@
 #define background_color_R 1.0
 #define background_color_G 1.0
 #define background_color_B 1.0
-#define WIDTH 1920.0
-#define HEIGHT 1080.0
+#define WIDTH 1920
+#define HEIGHT 1080
 
 static GLfloat spin = 0.0;
 static GLfloat spinX = 0.0;
@@ -145,10 +145,16 @@ private:
 			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 		else if (drawMethod == '2') {
+			unsigned int *offset = (unsigned int*)malloc(size * sizeof(unsigned int));
+			
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_INT, 0, data);
-			glDrawElements(GL_TRIANGLES, size*2, GL_UNSIGNED_INT, data);
+			for (unsigned int i = 0; i < size; i++) {
+				*(offset + i) = i;
+			}
+			glDrawElements(GL_POLYGON, size, GL_UNSIGNED_INT, offset);
 			glDisableClientState(GL_VERTEX_ARRAY);
+			free(offset);
 		}
 		else if (drawMethod == '3') {
 			//glMultiDrawArrays();
