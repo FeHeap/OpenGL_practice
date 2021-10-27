@@ -113,7 +113,7 @@ void Reshape(int width, int height) {
 	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-WIDTH, WIDTH, -HEIGHT, HEIGHT, 1000.0, -1000.0);
+	glOrtho(-3*WIDTH, 3*WIDTH, -3*HEIGHT, 3*HEIGHT, 1000.0, -1000.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
