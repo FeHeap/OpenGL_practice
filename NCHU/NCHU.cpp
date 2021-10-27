@@ -148,7 +148,7 @@ private:
 			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 		else if (drawMethod == '2') {
-			unsigned int *offset = (unsigned int*)malloc(size * sizeof(unsigned int));
+			unsigned int *offset = new unsigned int[size];
 			
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(2, GL_INT, 0, data);
@@ -157,7 +157,7 @@ private:
 			}
 			glDrawElements(GL_POLYGON, size, GL_UNSIGNED_INT, offset);
 			glDisableClientState(GL_VERTEX_ARRAY);
-			free(offset);
+			delete [] offset;
 		}
 	}
 	
@@ -1458,7 +1458,7 @@ private:
 	GLuint* MultiDrawIndices[163];
 
 	void polygon_xyConverse(int (*data)[2], int size) {
-		MultiDrawIndices[countGraphIndex] = (unsigned int*)malloc(size * sizeof(int));
+		MultiDrawIndices[countGraphIndex] = new unsigned int[size];
 		MultiDrawStart[countGraphIndex] = countPointIndex;
 		MultiDrawSize[countGraphIndex++] = size;
 		for (int i = 0; i < size; i++) {
