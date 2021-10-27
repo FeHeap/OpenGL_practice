@@ -1,17 +1,15 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
-#include <cstdio>
 
 #define DrawPolygon(X) drawPolygon(X, sizeof(X) / sizeof(X[0]))
 #define DrawTriangles(X) drawTriangles(X, sizeof(X) / sizeof(X[0]))
 #define Polygon_xyConverse(X) polygon_xyConverse(X, sizeof(X) / sizeof(X[0]))
 #define Triangles_xyConverse(X) triangles_xyConverse(X, sizeof(X) / sizeof(X[0]))
 
-#define background_color_R 1.0
-#define background_color_G 1.0
-#define background_color_B 1.0
 #define WIDTH 1920
 #define HEIGHT 1080
+
+float background_color[3] = { 1.0, 1.0, 1.0, };
 
 static GLfloat spin = 0.0;
 static GLfloat spinX = 0.0;
@@ -121,12 +119,12 @@ void Reshape(int width, int height) {
 }
 
 void background() {
-	glColor3f(background_color_R, background_color_G, background_color_B);
+	glColor3fv(background_color);
 	glBegin(GL_POLYGON);
-	glVertex2f(-WIDTH, HEIGHT);
-	glVertex2f(-WIDTH, -HEIGHT);
-	glVertex2f(WIDTH, -HEIGHT);
-	glVertex2f(WIDTH, HEIGHT);
+		glVertex2f(-WIDTH, HEIGHT);
+		glVertex2f(-WIDTH, -HEIGHT);
+		glVertex2f(WIDTH, -HEIGHT);
+		glVertex2f(WIDTH, HEIGHT);
 	glEnd();
 }
 
@@ -162,28 +160,29 @@ private:
 			free(offset);
 		}
 	}
-
-	void displayMultiArray_ch() {
+	
+	// glMultiDrawArrays
+	void displayMultiArrays_ch() {
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_INT, 0, MultiDrawPointsXY);
 		glMultiDrawArrays(GL_POLYGON, MultiDrawStart, MultiDrawSize, 136);
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
-	void displayMultiArray_logo_out() {
+	void displayMultiArrays_logo_out() {
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_INT, 0, &MultiDrawPointsXY[672]);
 		int temp_start[1] = { 0 };
 		glMultiDrawArrays(GL_POLYGON, temp_start, &MultiDrawSize[136], 1);
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
-	void displayMultiArray_logo_core() {
+	void displayMultiArrays_logo_core() {
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_INT, 0, &MultiDrawPointsXY[676]);
 		int temp_start[1] = { 0 };
 		glMultiDrawArrays(GL_POLYGON, temp_start, &MultiDrawSize[137], 1);
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
-	void displayMultiArray_logo_cut() {
+	void displayMultiArrays_logo_cut() {
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_INT, 0, &MultiDrawPointsXY[699]);
 		int temp_start[25];
@@ -193,6 +192,36 @@ private:
 		glMultiDrawArrays(GL_POLYGON, temp_start, &MultiDrawSize[138], 25);
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
+
+	// glMultiDrawElements
+	void displayMultiElements_ch() {
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_INT, 0, MultiDrawPointsXY);
+		glMultiDrawElements(GL_POLYGON, MultiDrawSize, GL_UNSIGNED_INT, (const void**)MultiDrawIndices, 136);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+	void displayMultiElements_logo_out() {
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_INT, 0, &MultiDrawPointsXY[672]);
+		glMultiDrawElements(GL_POLYGON, &MultiDrawSize[136], GL_UNSIGNED_INT, (const void**)&MultiDrawIndices[136], 1);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+	void displayMultiElements_logo_core() {
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_INT, 0, &MultiDrawPointsXY[676]);
+		glMultiDrawElements(GL_POLYGON, &MultiDrawSize[137], GL_UNSIGNED_INT, (const void**)&MultiDrawIndices[137], 1);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+	void displayMultiElements_logo_cut() {
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_INT, 0, &MultiDrawPointsXY[699]);
+		glMultiDrawElements(GL_POLYGON, &MultiDrawSize[138], GL_UNSIGNED_INT, (const void**)&MultiDrawIndices[138], 25);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+
+
+	// ch_color
+	float ch_color[3] = { 0.007, 0.4375, 0.589 };
 
 	// ch_1
 	int ch_1_1[4][2] = {
@@ -1299,6 +1328,10 @@ private:
 		DrawPolygon(ch_6_47);
 	}
 
+	// logo_out_color
+	float logo_out_color[3] = { 0.007, 0.4375, 0.589 };
+	// logo_core_color
+	float logo_core_color[3] = { 0.898, 0.102, 0.129 };
 	// logo_out
 	int logo_out[4][2] = {
 		{1491, 327},
@@ -1306,7 +1339,6 @@ private:
 		{1734, 564},
 		{1719, 328},
 	};
-
 	// logo_core
 	int logo_core[23][2] = {
 		{1601, 386},
@@ -1333,7 +1365,6 @@ private:
 		{1627, 389},
 		{1614, 387},
 	};
-
 	// logo_cut
 	int logo_cut_left[14][2] = {
 		{1491, 327},
@@ -1424,15 +1455,27 @@ private:
 	GLint MultiDrawStart[163];
 	GLsizei MultiDrawSize[163];
 	int countGraphIndex = 0;
+	GLuint* MultiDrawIndices[163];
 
-
-	void polygon_xyConverse(int(*data)[2], int size) {
-		printf("%d %d %d\n", countGraphIndex, countPointIndex, size);
+	void polygon_xyConverse(int (*data)[2], int size) {
+		MultiDrawIndices[countGraphIndex] = (unsigned int*)malloc(size * sizeof(int));
 		MultiDrawStart[countGraphIndex] = countPointIndex;
 		MultiDrawSize[countGraphIndex++] = size;
 		for (int i = 0; i < size; i++) {
 			data[i][0] = (data[i][0] - origin[0]);
 			data[i][1] = (origin[1] - data[i][1]);
+			if (countPointIndex < 672) {
+				MultiDrawIndices[countGraphIndex - 1][i] = countPointIndex;
+			}
+			else if (countPointIndex < 676) {
+				MultiDrawIndices[countGraphIndex - 1][i] = countPointIndex-672;
+			}
+			else if (countPointIndex < 699) {
+				MultiDrawIndices[countGraphIndex - 1][i] = countPointIndex - 676;
+			}
+			else {
+				MultiDrawIndices[countGraphIndex - 1][i] = countPointIndex - 699;
+			}
 			MultiDrawPointsXY[countPointIndex][0] = data[i][0];
 			MultiDrawPointsXY[countPointIndex++][1] = data[i][1];
 		}
@@ -1594,8 +1637,14 @@ public:
 		presetData();
 	}
 
+	~NchuCh() {
+		for (int i = 0; i < 163; i++) {
+			delete [] MultiDrawIndices[i];
+		}
+	}
+
 	void display_ch() {
-		glColor3f(0.007, 0.4375, 0.589);
+		glColor3fv(ch_color);
 		switch (drawMethod) {
 		case '0':
 		case '1':
@@ -1608,7 +1657,10 @@ public:
 			display_ch_6();
 			break;
 		case '3':
-			displayMultiArray_ch();
+			displayMultiArrays_ch();
+			break;
+		case '4':
+			displayMultiElements_ch();
 			break;
 		}
 	}
@@ -1618,11 +1670,11 @@ public:
 		case '0':
 		case '1':
 		case '2':
-			glColor3f(0.007, 0.4375, 0.589);
+			glColor3fv(logo_out_color);
 			DrawPolygon(logo_out);
-			glColor3f(0.898, 0.102, 0.129);
+			glColor3fv(logo_core_color);
 			DrawPolygon(logo_core);
-			glColor3f(background_color_R, background_color_G, background_color_B);
+			glColor3fv(background_color);
 			DrawPolygon(logo_cut_left);
 			DrawPolygon(logo_cut_right);
 			DrawPolygon(logo_cut_above);
@@ -1632,12 +1684,20 @@ public:
 			}
 			break;
 		case '3':
-			glColor3f(0.007, 0.4375, 0.589);
-			displayMultiArray_logo_out();
-			glColor3f(0.898, 0.102, 0.129);
-			displayMultiArray_logo_core();
-			glColor3f(background_color_R, background_color_G, background_color_B);
-			displayMultiArray_logo_cut();
+			glColor3fv(logo_out_color);
+			displayMultiArrays_logo_out();
+			glColor3fv(logo_core_color);
+			displayMultiArrays_logo_core();
+			glColor3fv(background_color);
+			displayMultiArrays_logo_cut();
+			break;
+		case '4':
+			glColor3fv(logo_out_color);
+			displayMultiElements_logo_out();
+			glColor3fv(logo_core_color);
+			displayMultiElements_logo_core();
+			glColor3fv(background_color);
+			displayMultiElements_logo_cut();
 			break;
 		}
 	}
@@ -1658,6 +1718,9 @@ private:
 		}
 
 	}
+
+	// en_color
+	float en_color[3] = { 0.007, 0.4375, 0.589 };
 
 	// National
 	int National[130][3][2] = {
@@ -2223,7 +2286,7 @@ public:
 	}
 
 	void display_en() {
-		glColor3f(0.007, 0.4375, 0.589);
+		glColor3fv(en_color);
 		DrawTriangles(National);
 		DrawTriangles(Chung);
 		DrawTriangles(Hsing);
