@@ -1,4 +1,5 @@
 #include <GL/glut.h>
+#include <cmath>
 
 #define DrawPolygon(X) drawPolygon(X, sizeof(X) / sizeof(X[0]))
 #define DrawTriangles(X) drawTriangles(X, sizeof(X) / sizeof(X[0]))
@@ -25,6 +26,8 @@ float step = 3.0;
 
 /* planet */
 static float sun = 0.0;
+static float floatBall = 0.0;
+static int floatBallState = 0;
 static float p1 = 0.0;
 static float p1_son = 0.0;
 static float p2 = 0.0;
@@ -32,6 +35,9 @@ static float p2 = 0.0;
 static int p1_son_color_state = 0;
 static float p1_son_color[3] = { 1.0, 1.0, 0.0 };
 
+/* arm */
+static float floatArm = 0.0;
+static int floatArmState = 0;
 
 void init(void);
 void Display(void);
@@ -2185,11 +2191,26 @@ void planetSpin(void) {
 	p2 += 1.0;
 	if (p2 > 360.0)
 		p2 -= 360.0;
+
+	floatBallState += 1;
+	floatBall = 0.1 * cos(0.062831 * floatBallState);
+	if (floatBallState == 100) {
+		floatBallState = 0;
+	}
+}
+
+void armFloat(void) {
+	floatArmState += 1;
+	floatArm = 0.05 * cos(0.0314159 * floatArmState);
+	if (floatArmState == 200) {
+		floatArmState = 0;
+	}
 }
 
 void IdleFunc(void) {
 	logoStateDisplay();
 	planetSpin();
+	armFloat();
 	glutPostRedisplay();
 }
 
@@ -2201,14 +2222,15 @@ void Display(void) {
 	gluLookAt(cx, cy, cz, cx, cy, cz - 1.0, 0.0, 1.0, 0.0);
 
 	glEnable(GL_DEPTH_TEST);
+
 	/* word */
 	glPushMatrix();
 	word_ch.display_ch();
 	word_en.display_en();
 	glPopMatrix();
 
-	glDisable(GL_DEPTH_TEST);
 	/* logo */
+	glDisable(GL_DEPTH_TEST);
 	glPushMatrix();
 	glTranslatef(647.0, 101.0, 0.0);
 	glRotatef(spin, 0.0, 1.0, 0.0);
@@ -2217,8 +2239,10 @@ void Display(void) {
 	glPopMatrix();
 	glEnable(GL_DEPTH_TEST);
 
+
 	/* planet */
 	glPushMatrix();
+	glTranslatef(0.0, floatBall, 0.0);
 
 	glTranslatef(cx + 6.0, cy + 1.0, cz - 12.0);
 	glRotatef(90.0, 1.0, 0.0, 0.0);
@@ -2249,6 +2273,8 @@ void Display(void) {
 	glutWireSphere(0.4, 10, 8);    /* draw smaller planet */
 	glPopMatrix();
 
+	glPushMatrix();
+	glTranslatef(0.0, floatArm, 0.0);
 	/* up arm hand */
 	glPushMatrix();
 	glTranslatef(cx + 6.0, cy - 4.0, cz - 5.0);
@@ -2258,6 +2284,8 @@ void Display(void) {
 	glutWireCube(5.0);
 	glPopMatrix();
 
+	glPushMatrix();
+	glTranslatef(0.0, floatArm, 0.0);
 	/* down arm hand */
 	glPushMatrix();
 	glTranslatef(cx + 6.5, cy - 4.0, cz - 10.0);
@@ -2315,6 +2343,8 @@ void Display(void) {
 	glutWireCube(1.0);
 	glTranslatef(-1.0, -0.4, 1.0);
 
+	glPopMatrix();
+	glPopMatrix();
 	glPopMatrix();
 
 	glDisable(GL_DEPTH_TEST);
