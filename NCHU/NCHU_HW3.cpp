@@ -23,6 +23,11 @@ float logo_core_color[3] = { 0.898, 0.102, 0.129 };
 GLfloat cameraPosition[3] = { 0.0, 0.0, 800.0 };
 // step
 float step = 3.0;
+// jump
+float jumpState = 0;
+float jumpSpeed = 0;
+float jumpMove = 0;
+float jumpSumMove = 0.0;
 
 /* planet */
 static float sun = 0.0;
@@ -91,6 +96,11 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'D':
 		cameraPosition[0] += step;
 		break;
+	case ' ':
+		if (jumpState == 0) {
+			jumpState = 1;
+			jumpSpeed = 10;
+		}
 	}
 }
 
@@ -2207,10 +2217,23 @@ void armFloat(void) {
 	}
 }
 
+void jump(void) {
+	if(jumpState == 1) {
+		jumpMove = jumpSpeed;
+		jumpSpeed -= 0.5;
+		jumpMove = (jumpMove + jumpSpeed) / 2;
+		if (jumpSpeed <= -9.6) {
+			jumpState = 0;
+		}
+		jumpSumMove += jumpMove;
+	}
+}
+
 void IdleFunc(void) {
 	logoStateDisplay();
 	planetSpin();
 	armFloat();
+	jump();
 	glutPostRedisplay();
 }
 
@@ -2219,7 +2242,7 @@ void Display(void) {
 
 	GLfloat cx = cameraPosition[0], cy = cameraPosition[1], cz = cameraPosition[2];
 	glLoadIdentity();
-	gluLookAt(cx, cy, cz, cx, cy, cz - 1.0, 0.0, 1.0, 0.0);
+	gluLookAt(cx, cy + jumpSumMove, cz, cx, cy + jumpSumMove, cz - 1.0, 0.0, 1.0, 0.0);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -2239,6 +2262,8 @@ void Display(void) {
 	glPopMatrix();
 	glEnable(GL_DEPTH_TEST);
 
+	/* jump */
+	glTranslatef(0.0, jumpSumMove, 0.0);
 
 	/* planet */
 	glPushMatrix();
