@@ -37,6 +37,7 @@ void init(void);
 void Display(void);
 void Reshape(int, int);
 void keyboard(unsigned char, int, int);
+void IdleFunc(void);
 
 int main(int argc, char* argv[]) {
 	glutInit(&argc, argv);
@@ -48,6 +49,7 @@ int main(int argc, char* argv[]) {
 	glutDisplayFunc(Display);
 	glutReshapeFunc(Reshape);
 	glutKeyboardFunc(keyboard);
+	glutIdleFunc(IdleFunc);
 	glutMainLoop();
 	return 0;
 }
@@ -1492,7 +1494,7 @@ public:
 	~NchuCh() {
 
 	}
-	
+
 
 	void display_ch() {
 		glColor3fv(ch_color);
@@ -2165,7 +2167,7 @@ void planetSpin(void) {
 	if (p1_son > 360.0)
 		p1_son -= 360.0;
 
-	if(p1_son_color_state == 0) {
+	if (p1_son_color_state == 0) {
 		p1_son_color[0] += 0.05;
 		p1_son_color[1] -= 0.05;
 		if (p1_son_color[0] > 2.0) {
@@ -2198,8 +2200,6 @@ void Display(void) {
 	glLoadIdentity();
 	gluLookAt(cx, cy, cz, cx, cy, cz - 1.0, 0.0, 1.0, 0.0);
 
-	glutIdleFunc(IdleFunc);
-
 	glEnable(GL_DEPTH_TEST);
 	/* word */
 	glPushMatrix();
@@ -2225,7 +2225,7 @@ void Display(void) {
 	glRotatef(sun, 0.0, 0.0, 1.0);
 	glColor3f(0.0, 1.0, 1.0);
 	glutWireSphere(2.0, 20, 16);   /* draw sun */
-	glRotatef(-1*sun, 0.0, 0.0, 1.0);
+	glRotatef(-1 * sun, 0.0, 0.0, 1.0);
 	glRotatef(p1, 0.0, 0.0, 1.0);
 	glTranslatef(4.0, 0.0, 0.0);
 	glColor3f(1.0, 0.0, 0.0);
@@ -2274,7 +2274,7 @@ void Display(void) {
 	glRotatef(70.0, -2.0, -0.2, 0.0);
 	glColor3f(1.0, 1.0, 1.0);
 	glScalef(0.25, 1.0, 0.25);
-	
+
 	// finger 1(left)
 	glTranslatef(-2.5, 3.0, 2.0);
 	glScalef(1.0, 0.75, 1.0);
@@ -2309,7 +2309,7 @@ void Display(void) {
 	glTranslatef(2.0, -1.0, 0.0);
 	glScalef(2.0, 0.25, 1.0);
 	glutWireCube(1.0);
-	glTranslatef(0.0 , -0.5, 0.0);
+	glTranslatef(0.0, -0.5, 0.0);
 	glTranslatef(0.5, 0.4, 2.0);
 	glScalef(0.5, 1.0, 2);
 	glutWireCube(1.0);
