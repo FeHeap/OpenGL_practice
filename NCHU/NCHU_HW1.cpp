@@ -1484,7 +1484,9 @@ public:
 		DrawPolygon(logo_cut_right);
 		DrawPolygon(logo_cut_above);
 		DrawPolygon(logo_cut_below);
-
+		for (int i = 0; i < sizeof(logo_cut_naka) / sizeof(logo_cut_naka[0]); i++) {
+			DrawPolygon(logo_cut_naka[i]);
+		}
 	}
 
 } word_ch(WIDTH, HEIGHT);
