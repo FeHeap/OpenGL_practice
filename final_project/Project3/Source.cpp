@@ -455,6 +455,7 @@ void init(void)
 int talk_state = 0;
 int voice_state[6] = { 0, 0, 0, 0, 0, 0 };
 int words_length_state[6] = { 1, 1, 1, 1, 1, 1 };
+int word_clock = (int)(4 * CLOCK_MULTIPLY);
 void talk_display() {
     /* ame head */
     glPushMatrix();
@@ -475,29 +476,36 @@ void talk_display() {
     glTexCoord2f(0.0, 1.0); glVertex3f(0, 1.255, -0.9);
     glEnd();
     glPopMatrix();
-    static int word_clock = 4;
+
+    glPushMatrix();
     if (talk_state < 6) {
         switch (talk_state) {
         case 0:
             if (Talk.talk_clock_0[words_length_state[0] / word_clock] < strlen(Talk.talk_0[0])) {
-                DrawString(-3.0, 2.5, 0.2, Talk.talk_0[0], Talk.talk_clock_0[words_length_state[0] / word_clock / (int)CLOCK_MULTIPLY]);
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_0[0], Talk.talk_clock_0[words_length_state[0] / word_clock]);
                 words_length_state[0]++;
             }
             else if (Talk.talk_clock_0[words_length_state[0] / word_clock] < strlen(Talk.talk_0[0]) + strlen(Talk.talk_0[1])) {
                 DrawString(-3.0, 2.5, 0.2, Talk.talk_0[0], strlen(Talk.talk_0[0]));
-                DrawString(-3.0, 2.05, 0.2, Talk.talk_0[1], Talk.talk_clock_0[words_length_state[0] / word_clock / (int)CLOCK_MULTIPLY] - strlen(Talk.talk_0[0]));
+                DrawString(-3.0, 2.05, 0.2, Talk.talk_0[1], Talk.talk_clock_0[words_length_state[0] / word_clock] - strlen(Talk.talk_0[0]));
                 words_length_state[0]++;
             }
             else if (Talk.talk_clock_0[words_length_state[0] / word_clock] < strlen(Talk.talk_0[0]) + strlen(Talk.talk_0[1]) + strlen(Talk.talk_0[2])) {
                 DrawString(-3.0, 2.5, 0.2, Talk.talk_0[0], strlen(Talk.talk_0[0]));
                 DrawString(-3.0, 2.05, 0.2, Talk.talk_0[1], strlen(Talk.talk_0[1]));
-                DrawString(-3.0, 1.60, 0.2, Talk.talk_0[2], Talk.talk_clock_0[words_length_state[0] / word_clock / (int)CLOCK_MULTIPLY] - strlen(Talk.talk_0[0]) - strlen(Talk.talk_0[1]));
+                DrawString(-3.0, 1.60, 0.2, Talk.talk_0[2], Talk.talk_clock_0[words_length_state[0] / word_clock] - strlen(Talk.talk_0[0]) - strlen(Talk.talk_0[1]));
                 words_length_state[0]++;
             }
             else {
                 DrawString(-3.0, 2.5, 0.2, Talk.talk_0[0], strlen(Talk.talk_0[0]));
                 DrawString(-3.0, 2.05, 0.2, Talk.talk_0[1], strlen(Talk.talk_0[1]));
                 DrawString(-3.0, 1.60, 0.2, Talk.talk_0[2], strlen(Talk.talk_0[2]));
+                glTranslated(4.4, 1.5, 0.2);
+                glBegin(GL_TRIANGLES);
+                    glVertex3f(-0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glEnd();
             }
             if (voice_state[0] == 0) {
                 PlaySound(L"ame/voice/voice_0.wav", NULL, SND_ASYNC | SND_FILENAME);
@@ -506,24 +514,30 @@ void talk_display() {
             break;
         case 1:
             if (Talk.talk_clock_1[words_length_state[1] / word_clock] < strlen(Talk.talk_1[0])) {
-                DrawString(-3.0, 2.5, 0.2, Talk.talk_1[0], Talk.talk_clock_1[words_length_state[1] / word_clock / (int)CLOCK_MULTIPLY]);
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_1[0], Talk.talk_clock_1[words_length_state[1] / word_clock]);
                 words_length_state[1]++;
             }
             else if (Talk.talk_clock_1[words_length_state[1] / word_clock] < strlen(Talk.talk_1[0]) + strlen(Talk.talk_1[1])) {
                 DrawString(-3.0, 2.5, 0.2, Talk.talk_1[0], strlen(Talk.talk_1[0]));
-                DrawString(-3.0, 2.05, 0.2, Talk.talk_1[1], Talk.talk_clock_1[words_length_state[1] / word_clock / (int)CLOCK_MULTIPLY] - strlen(Talk.talk_1[0]));
+                DrawString(-3.0, 2.05, 0.2, Talk.talk_1[1], Talk.talk_clock_1[words_length_state[1] / word_clock] - strlen(Talk.talk_1[0]));
                 words_length_state[1]++;
             }
             else if (Talk.talk_clock_1[words_length_state[1] / word_clock] < strlen(Talk.talk_1[0]) + strlen(Talk.talk_1[1]) + strlen(Talk.talk_1[2])) {
                 DrawString(-3.0, 2.5, 0.2, Talk.talk_1[0], strlen(Talk.talk_1[0]));
                 DrawString(-3.0, 2.05, 0.2, Talk.talk_1[1], strlen(Talk.talk_1[1]));
-                DrawString(-3.0, 1.60, 0.2, Talk.talk_1[2], Talk.talk_clock_1[words_length_state[1] / word_clock / (int)CLOCK_MULTIPLY] - strlen(Talk.talk_1[0]) - strlen(Talk.talk_1[1]));
+                DrawString(-3.0, 1.60, 0.2, Talk.talk_1[2], Talk.talk_clock_1[words_length_state[1] / word_clock] - strlen(Talk.talk_1[0]) - strlen(Talk.talk_1[1]));
                 words_length_state[1]++;
             }
             else {
                 DrawString(-3.0, 2.5, 0.2, Talk.talk_1[0], strlen(Talk.talk_1[0]));
                 DrawString(-3.0, 2.05, 0.2, Talk.talk_1[1], strlen(Talk.talk_1[1]));
                 DrawString(-3.0, 1.60, 0.2, Talk.talk_1[2], strlen(Talk.talk_1[2]));
+                glTranslated(4.4, 1.5, 0.2);
+                glBegin(GL_TRIANGLES);
+                    glVertex3f(-0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glEnd();
             }
             if (voice_state[1] == 0) {
                 PlaySound(L"ame/voice/voice_1.wav", NULL, SND_ASYNC | SND_FILENAME);
@@ -531,33 +545,107 @@ void talk_display() {
             }
             break;
         case 2:
-            DrawString(-3.0, 2.5, 0.2, Talk.talk_2[0], 0);
-            DrawString(-3.0, 2.05, 0.2, Talk.talk_2[1], 0);
+            if (Talk.talk_clock_2[words_length_state[2] / word_clock] < strlen(Talk.talk_2[0])) {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_2[0], Talk.talk_clock_2[words_length_state[2] / word_clock]);
+                words_length_state[2]++;
+            }
+            else if (Talk.talk_clock_2[words_length_state[2] / word_clock] < strlen(Talk.talk_2[0]) + strlen(Talk.talk_2[1])) {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_2[0], strlen(Talk.talk_2[0]));
+                DrawString(-3.0, 2.05, 0.2, Talk.talk_2[1], Talk.talk_clock_2[words_length_state[2] / word_clock] - strlen(Talk.talk_2[0]));
+                words_length_state[2]++;
+            }
+            else {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_2[0], strlen(Talk.talk_2[0]));
+                DrawString(-3.0, 2.05, 0.2, Talk.talk_2[1], strlen(Talk.talk_2[1]));
+                glTranslated(4.4, 1.5, 0.2);
+                glBegin(GL_TRIANGLES);
+                    glVertex3f(-0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glEnd();
+            }
             if (voice_state[2] == 0) {
                 PlaySound(L"ame/voice/voice_2.wav", NULL, SND_ASYNC | SND_FILENAME);
                 voice_state[2] = 1;
             }
             break;
         case 3:
-            DrawString(-3.0, 2.5, 0.2, Talk.talk_3[0], 0);
-            DrawString(-3.0, 2.05, 0.2, Talk.talk_3[1], 0);
+            if (Talk.talk_clock_3[words_length_state[3] / word_clock] < strlen(Talk.talk_3[0])) {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_3[0], Talk.talk_clock_3[words_length_state[3] / word_clock]);
+                words_length_state[3]++;
+            }
+            else if (Talk.talk_clock_3[words_length_state[3] / word_clock] < strlen(Talk.talk_3[0]) + strlen(Talk.talk_3[1])) {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_3[0], strlen(Talk.talk_3[0]));
+                DrawString(-3.0, 2.05, 0.2, Talk.talk_3[1], Talk.talk_clock_3[words_length_state[3] / word_clock] - strlen(Talk.talk_3[0]));
+                words_length_state[3]++;
+            }
+            else {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_3[0], strlen(Talk.talk_3[0]));
+                DrawString(-3.0, 2.05, 0.2, Talk.talk_3[1], strlen(Talk.talk_3[1]));
+                glTranslated(4.4, 1.5, 0.2);
+                glBegin(GL_TRIANGLES);
+                    glVertex3f(-0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glEnd();
+            }
             if (voice_state[3] == 0) {
                 PlaySound(L"ame/voice/voice_3.wav", NULL, SND_ASYNC | SND_FILENAME);
                 voice_state[3] = 1;
             }
             break;
         case 4:
-            DrawString(-3.0, 2.5, 0.2, Talk.talk_4[0], 0);
-            DrawString(-3.0, 2.05, 0.2, Talk.talk_4[1], 0);
-            DrawString(-3.0, 1.60, 0.2, Talk.talk_4[2], 0);
+            if (Talk.talk_clock_4[words_length_state[4] / word_clock] < strlen(Talk.talk_4[0])) {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_4[0], Talk.talk_clock_4[words_length_state[4] / word_clock]);
+                words_length_state[4]++;
+            }
+            else if (Talk.talk_clock_4[words_length_state[4] / word_clock] < strlen(Talk.talk_4[0]) + strlen(Talk.talk_4[1])) {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_4[0], strlen(Talk.talk_4[0]));
+                DrawString(-3.0, 2.05, 0.2, Talk.talk_4[1], Talk.talk_clock_4[words_length_state[4] / word_clock] - strlen(Talk.talk_4[0]));
+                words_length_state[4]++;
+            }
+            else if (Talk.talk_clock_4[words_length_state[4] / word_clock] < strlen(Talk.talk_4[0]) + strlen(Talk.talk_4[1]) + strlen(Talk.talk_4[2])) {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_4[0], strlen(Talk.talk_4[0]));
+                DrawString(-3.0, 2.05, 0.2, Talk.talk_4[1], strlen(Talk.talk_4[1]));
+                DrawString(-3.0, 1.60, 0.2, Talk.talk_4[2], Talk.talk_clock_4[words_length_state[4] / word_clock] - strlen(Talk.talk_4[0]) - strlen(Talk.talk_4[1]));
+                words_length_state[4]++;
+            }
+            else {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_4[0], strlen(Talk.talk_4[0]));
+                DrawString(-3.0, 2.05, 0.2, Talk.talk_4[1], strlen(Talk.talk_4[1]));
+                DrawString(-3.0, 1.60, 0.2, Talk.talk_4[2], strlen(Talk.talk_4[2]));
+                glTranslated(4.4, 1.5, 0.2);
+                glBegin(GL_TRIANGLES);
+                    glVertex3f(-0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glEnd();
+            }
             if (voice_state[4] == 0) {
                 PlaySound(L"ame/voice/voice_4.wav", NULL, SND_ASYNC | SND_FILENAME);
                 voice_state[4] = 1;
             }
             break;
         case 5:
-            DrawString(-3.0, 2.5, 0.2, Talk.talk_5[0], 0);
-            DrawString(-3.0, 2.05, 0.2, Talk.talk_5[1], 0);
+            if (Talk.talk_clock_5[words_length_state[5] / word_clock] < strlen(Talk.talk_5[0])) {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_5[0], Talk.talk_clock_5[words_length_state[5] / word_clock]);
+                words_length_state[5]++;
+            }
+            else if (Talk.talk_clock_5[words_length_state[5] / word_clock] < strlen(Talk.talk_5[0]) + strlen(Talk.talk_5[1])) {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_5[0], strlen(Talk.talk_5[0]));
+                DrawString(-3.0, 2.05, 0.2, Talk.talk_5[1], Talk.talk_clock_5[words_length_state[5] / word_clock] - strlen(Talk.talk_5[0]));
+                words_length_state[5]++;
+            }
+            else {
+                DrawString(-3.0, 2.5, 0.2, Talk.talk_5[0], strlen(Talk.talk_5[0]));
+                DrawString(-3.0, 2.05, 0.2, Talk.talk_5[1], strlen(Talk.talk_5[1]));
+                glTranslated(4.4, 1.5, 0.2);
+                glBegin(GL_TRIANGLES);
+                    glVertex3f(-0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.15f, 0.0f, 0.2f);
+                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glEnd();
+            }
             if (voice_state[5] == 0) {
                 PlaySound(L"ame/voice/voice_5.wav", NULL, SND_ASYNC | SND_FILENAME);
                 voice_state[5] = 1;
@@ -567,6 +655,7 @@ void talk_display() {
             break;
         }
     }
+    glPopMatrix();
 }
 
 void display(void) {
@@ -588,7 +677,6 @@ void display(void) {
         }
 
         glBindTexture(GL_TEXTURE_2D, sm_texture[sm_state]);
-
         glBegin(GL_QUADS);
         glTexCoord2f(0.0, 0.0); glVertex3f(-1.25, -0.75, -0.999);
         glTexCoord2f(1.0, 0.0); glVertex3f(1.25, -0.75, -0.999);
@@ -829,11 +917,16 @@ void keyboard(unsigned char key, int x, int y) {
     else if(start_flag == 2) {
         switch (key) {
         case ' ':
-            talk_state += 1;
-            if (talk_state == 6) {
-                start_flag = 1;
-                ame_state = run;
-                PlaySound(L"ame/Amelia_Watsons_BGM.wav", NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+            if (words_length_state[talk_state] / word_clock < Talk.talks_end[talk_state]) {
+                words_length_state[talk_state] = Talk.talks_end[talk_state] * word_clock;
+            }
+            else {
+                talk_state += 1;
+                if (talk_state == 6) {
+                    start_flag = 1;
+                    ame_state = run;
+                    PlaySound(L"ame/Amelia_Watsons_BGM.wav", NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+                }
             }
             break;
         default: // pass
