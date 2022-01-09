@@ -153,14 +153,16 @@ Image* loadTexture(char* fileName, int character, int negative) {
 #pragma comment(lib, "comsuppw.lib")
 #endif
 
-COLORREF m_FontColor = RGB(255, 128, 255);
+COLORREF m_FontColor = RGB(0, 0, 0);
 void DrawString(float x, float y, float z, const char* strText, int length) {
     HDC hDC = wglGetCurrentDC();
+    int xx;
+    float r, g, b;
 
-    int xx = m_FontColor;
-    float r = GetRValue(m_FontColor) / 255.0f;
-    float g = GetGValue(m_FontColor) / 255.0f;
-    float b = GetBValue(m_FontColor) / 255.0f;
+    xx = m_FontColor;
+    r = GetRValue(m_FontColor) / 255.0f;
+    g = GetGValue(m_FontColor) / 255.0f;
+    b = GetBValue(m_FontColor) / 255.0f;
     glColor3f(r, g, b);
     glRasterPos3f(x, y, z);
     int ListNum;
@@ -234,6 +236,7 @@ GLuint gura_texture[GURA_IMG_NUM];
 int gura_state = 0;
 float gura_translate = 3.0;
 int gura_vector = 0;
+float gura_translate_unit = 0.05 / CLOCK_MULTIPLY;
 
 /* kiara */
 #define KIARA_IMG_NUM 3
@@ -241,18 +244,33 @@ int gura_vector = 0;
 GLuint kiara_texture[KIARA_IMG_NUM];
 int kiara_state = 0;
 float kiara_translate = 5.0;
+float kiara_translate_unit = 0.055 / CLOCK_MULTIPLY;
 
 /* background */
 #define BG_NUM 5
-#define AME_BG_NUM 2
+#define AME_BG_NUM 7
 GLuint bg_texture[BG_NUM][2];
 GLuint bg_ame[AME_BG_NUM];
 int bg_state = 0;
 float bg_translate = 0.0;
+float bg_translate_unit = 0.03 / CLOCK_MULTIPLY;
 
-/* control */
-int start_flag = 0;
-int the_world = 0;
+/* object */
+// diamond
+#define DIAMOND_FULL 16
+#define DIAMOND_UP -1.2f
+#define DIAMOND_DOWN -2.6f
+GLuint diamond;
+float diamond_bucket[DIAMOND_FULL][2];
+float diamond_step = 0.023 / CLOCK_MULTIPLY;
+void diamond_init() {
+    for (int i = 0; i < DIAMOND_FULL; i++) {
+        diamond_bucket[i][0] = 0;
+        diamond_bucket[i][1] = 0;
+    }
+}
+// bubba
+GLuint bubba;
 
 /* start */
 GLuint ame_head;
@@ -261,6 +279,44 @@ GLuint sm_texture[4];
 int sm_state = 0;
 int start_mark_appear = 1;
 
+/* control */
+int start_flag = 0;
+int the_world = 0;
+
+/* the world */
+#define THE_WORLD_BASIC_COUNT 220
+#define THE_WORLD_BASIC_COUNT_RE 110
+int the_world_voice_count = 0;
+void the_world_idleFunc() {
+    if (the_world_voice_count > 0) {
+        if (rand() % 20 == 0) {
+            int back = rand() % 100 - 50;
+            bg_translate += (back * bg_translate_unit);
+            for (int i = 0; i < DIAMOND_FULL; i++) {
+                if (diamond_bucket[i][1] != 0) {
+                    diamond_bucket[i][0] += (back * diamond_step);
+                }
+            }
+        }
+        the_world_voice_count--;
+        if (the_world_voice_count < THE_WORLD_BASIC_COUNT * CLOCK_MULTIPLY / 2) {
+            gura_translate_unit *= 0.96;
+            kiara_translate_unit *= 0.96;
+        }
+    }
+}
+
+void out_of_the_world_idleFunc() {
+    if (the_world_voice_count > 0) {
+        the_world_voice_count--;
+        gura_translate_unit *= 1.042;
+        kiara_translate_unit *= 1.042;
+        if (the_world_voice_count == 0) {
+            gura_translate_unit = 0.05 / CLOCK_MULTIPLY;
+            kiara_translate_unit = 0.055 / CLOCK_MULTIPLY;
+        }
+    }
+}
 
 void init(void)
 {
@@ -437,6 +493,33 @@ void init(void)
         free(image1);
     }
     
+    /* Diamond */
+    image1 = loadTexture((char*)"object/Diamond.bmp", 1, 0);
+    if (image1 == NULL) {
+        printf("Image was not returned from loadTexture\n");
+        exit(0);
+    }
+    // Create Texture
+    glGenTextures(1, &diamond);
+    glBindTexture(GL_TEXTURE_2D, diamond);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
+    glTexImage2D(GL_TEXTURE_2D, 0, 2, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
+    free(image1);
+
+    /* Bubba */
+    image1 = loadTexture((char*)"object/bubba.bmp", 1, 0);
+    if (image1 == NULL) {
+        printf("Image was not returned from loadTexture\n");
+        exit(0);
+    }
+    // Create Texture
+    glGenTextures(1, &bubba);
+    glBindTexture(GL_TEXTURE_2D, bubba);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
+    glTexImage2D(GL_TEXTURE_2D, 0, 2, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
+    free(image1);
     
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ALPHA);
     glAlphaFunc(GL_GREATER, .8f);
@@ -450,6 +533,7 @@ void init(void)
     srand(time(NULL));
 
     PlaySound(L"ame/Amelia_Watsons_BGM_OP.wav", NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+    diamond_init();
 }
 
 int talk_state = 0;
@@ -459,6 +543,7 @@ int word_clock = (int)(4 * CLOCK_MULTIPLY);
 void talk_display() {
     /* ame head */
     glPushMatrix();
+    glColor4f(1.f, 1.f, 1.f, 1.f);
     glTranslated(-6.0, 3.0, 0);
     glBindTexture(GL_TEXTURE_2D, ame_head);
     glBegin(GL_QUADS);
@@ -658,6 +743,94 @@ void talk_display() {
     glPopMatrix();
 }
 
+/* score */
+int score = 0;
+void score_display() {
+    static char score_buff[7] = "000000";
+    glPushMatrix();
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    glBindTexture(GL_TEXTURE_2D, ame_talk);
+    glTranslated(7.2, 4.2, 0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex3f(-1.0, -0.3, -0.99);
+    glTexCoord2f(1.0, 0.0); glVertex3f(1.0, -0.3, -0.99);
+    glTexCoord2f(1.0, 1.0); glVertex3f(1.0, 0.3, -0.99);
+    glTexCoord2f(0.0, 1.0); glVertex3f(-1.0, 0.3, -0.99);
+    glEnd();
+    sprintf(score_buff, "%06d", score);
+    DrawString(-0.65, -0.1, -0.98, score_buff, strlen(score_buff));
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    glPopMatrix();
+}
+/* blood */
+#define BLOOD_MAX 3
+int blood = 3;
+void blood_display() {
+    glPushMatrix();
+    glBindTexture(GL_TEXTURE_2D, bubba);
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    glTranslated(-5.6f, 3.0f, 0);
+    for (int i = 0; i < BLOOD_MAX; i++) {
+        if (i >= blood) {
+            glColor4f(0.f, 0.f, 0.f, 0.2f);
+            glDisable(GL_ALPHA_TEST);
+        }
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0, 0.0); glVertex3f(-0.48, -0.52, -0.00003);
+        glTexCoord2f(1.0, 0.0); glVertex3f(0.48, -0.52, -0.00003);
+        glTexCoord2f(1.0, 1.0); glVertex3f(0.48, 0.52, -0.00003);
+        glTexCoord2f(0.0, 1.0); glVertex3f(-0.48, 0.52, -0.00003);
+        glEnd();
+        glTranslated(1.0f, 0, 0);
+    }
+    glEnable(GL_ALPHA_TEST);
+    glPopMatrix();
+}
+
+void diamond_display() {
+    glPushMatrix();
+    glBindTexture(GL_TEXTURE_2D, diamond);
+    for (int i = 0; i < DIAMOND_FULL; i++) {
+        if (diamond_bucket[i][1] != 0.0f) {
+            glTranslated(diamond_bucket[i][0], diamond_bucket[i][1], 0);
+            if (the_world) {
+                glColor4f(1.f, 0.f, 0.f, 1.f);
+            }
+            else {
+                glColor4f(0.29f, 0.93f, 0.855f, 1.f);
+            }
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0, 0.0); glVertex3f(-0.24, -0.26, -0.00003);
+            glTexCoord2f(1.0, 0.0); glVertex3f(0.24, -0.26, -0.00003);
+            glTexCoord2f(1.0, 1.0); glVertex3f(0.24, 0.26, -0.00003);
+            glTexCoord2f(0.0, 1.0); glVertex3f(-0.24, 0.26, -0.00003);
+            glEnd();
+            glColor4f(0.f, 0.f, 0.f, 0.2f);
+            glDisable(GL_ALPHA_TEST);
+            if (diamond_bucket[i][1] == DIAMOND_DOWN) {
+                glBegin(GL_QUADS);
+                glTexCoord2f(0.0, 1.0); glVertex3f(-0.34, -0.785, -0.00003);
+                glTexCoord2f(1.0, 1.0); glVertex3f(0.14, -0.785, -0.00003);
+                glTexCoord2f(1.0, 0.0); glVertex3f(0.24, -0.665, -0.00003);
+                glTexCoord2f(0.0, 0.0); glVertex3f(-0.24, -0.665, -0.00003);
+                glEnd();
+            }
+            else {
+                glBegin(GL_QUADS);
+                glTexCoord2f(0.0, 1.0); glVertex3f(-0.34, -2.385, -0.00003);
+                glTexCoord2f(1.0, 1.0); glVertex3f(0.14, -2.385, -0.00003);
+                glTexCoord2f(1.0, 0.0); glVertex3f(0.24, -2.265, -0.00003);
+                glTexCoord2f(0.0, 0.0); glVertex3f(-0.24, -2.265, -0.00003);
+                glEnd();
+            }
+            glEnable(GL_ALPHA_TEST);
+            glTranslated(-diamond_bucket[i][0], -diamond_bucket[i][1], 0);
+        }
+    }
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    glPopMatrix();
+}
+
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -666,7 +839,6 @@ void display(void) {
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_ALPHA_TEST);
     glColor4f(1.f, 1.f, 1.f, 1.f);
-
     
     glPushMatrix();
     glTranslated(bg_translate, 0, 0);
@@ -698,7 +870,7 @@ void display(void) {
     glPopMatrix();
     /* the word ame */
     glPushMatrix();
-    if (the_world && rand() % 20 == 0) {
+    if (the_world && rand() % 17 == 0) {
         int ame_bg_index = rand() % AME_BG_NUM;
         glBindTexture(GL_TEXTURE_2D, bg_ame[ame_bg_index]);
         glBegin(GL_QUADS);
@@ -710,10 +882,20 @@ void display(void) {
     }
     glPopMatrix();
 
+    /* diamond_diaplay */
+    diamond_display();
+
     /* ame start talk */
     if (start_flag == 2) {
         talk_display();
     }
+    
+    if(start_flag == 1) {
+        score_display();
+        blood_display();
+    }
+
+    
 
     static float run_per_img = CLOCK_PER_RUN_IMG * CLOCK_MULTIPLY;
     static float jump_per_img = CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY;
@@ -881,6 +1063,9 @@ void keyboard(unsigned char key, int x, int y) {
                 if (the_world && rand() % 7 == 1) {
                     engine->play2D("ame/watson_amelia_get_the_fuck_up.wav");
                 }
+                else {
+                    engine->play2D("ame/watson_amelia_hic.mp3");
+                }
                 if (-8.0 <= gura_translate && gura_translate <= -4.0 && gura_vector == 1 || -4.0 <= gura_translate && gura_translate <= 0.0 && gura_vector == 0) {
                     if (rand() % 43 == 1) {
                         engine->play2D("gura/Haachama.wav");
@@ -899,11 +1084,13 @@ void keyboard(unsigned char key, int x, int y) {
         case 'F':
             if (start_mark_appear == 0) {
                 if (!the_world) {
+                    the_world_voice_count = THE_WORLD_BASIC_COUNT * CLOCK_MULTIPLY;
                     the_world = 1;
                     PlaySound(L"ame/Giornos_Theme_Il_vento_doro.wav", NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
                     engine->play2D("ame/za_warudo_stop_time_sound.mp3");
                 }
-                else {
+                else if (the_world && the_world_voice_count == 0) {
+                    the_world_voice_count = THE_WORLD_BASIC_COUNT_RE * CLOCK_MULTIPLY;
                     the_world = 0;
                     engine->play2D("ame/za_warudo_the_world_time_resume.mp3");
                     PlaySound(L"ame/Amelia_Watsons_BGM.wav", NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
@@ -934,6 +1121,8 @@ void keyboard(unsigned char key, int x, int y) {
         }
     }
 }
+
+
 
 /* mouse */
 void mouse(int button, int state, int x, int y) {
@@ -992,12 +1181,24 @@ void ame_run_state_idleFunc() {
 
 void ame_jump_state_idleFunc() {
     static int ame_jump_state_boundary = (int)(JUMP_IMG_NUM * CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY);
+    static int ame_jump_down = (int)(14 * CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY);
     if (ame_jump_state == ame_jump_state_boundary) {
         ame_jump_state = 0;
         ame_state = run;
     }
     else {
         ame_jump_state++;
+        if (ame_jump_state == ame_jump_down) {
+            engine->play2D("ame/ame_jump_down.wav");
+        }
+    }
+}
+
+#define BASIC_AME_GUARD 60
+int ame_guard = 0;
+void ame_guard_idleFunc() {
+    if (ame_guard > 0) {
+        ame_guard--;
     }
 }
 
@@ -1012,6 +1213,27 @@ void kiara_idleFunc() {
     }
 }
 
+void kiara_move_idleFunc() {
+    if (kiara_translate < -7.5) {
+        kiara_translate = 7.5 + rand() % 30;
+    }
+
+    if (-3.67f < kiara_translate && kiara_translate < -2.87f) {
+        int ame_y_detect = ame_jump_state / CLOCK_PER_JUMP_IMG;
+        if ((2 <= ame_y_detect && ame_y_detect <= 13) && ame_guard == 0) {
+            blood -= 1;
+            if (blood == 0) {
+
+            }
+            else {
+                ame_guard = BASIC_AME_GUARD * CLOCK_MULTIPLY;
+            }
+        }
+    }
+
+    kiara_translate -= kiara_translate_unit;
+}
+
 /* gura idle function */
 void gura_state_idleFunc() {
     static int gura_state_boundary = ((int)(GURA_IMG_NUM * CLOCK_PER_GURA_IMG * CLOCK_MULTIPLY) - 1);
@@ -1024,12 +1246,24 @@ void gura_state_idleFunc() {
 }
 
 void gura_move_idleFunc() {
-    static int gura_vector_point = (int)(43 * CLOCK_MULTIPLY);
-    if (rand() % gura_vector_point == 1) {
+    static int gura_vector_point = (int)(79 * CLOCK_MULTIPLY);
+    if (!the_world && rand() % gura_vector_point == 1) {
         gura_vector = !gura_vector;
     }
 
-    static float gura_translate_unit = 0.05 / CLOCK_MULTIPLY;
+    if (-3.67f < gura_translate && gura_translate < -2.87f) {
+        int ame_y_detect = ame_jump_state / CLOCK_PER_JUMP_IMG;
+        if ((ame_y_detect == 0 || ame_y_detect >= 13) && ame_guard == 0) {
+            blood -= 1;
+            if (blood == 0) {
+
+            }
+            else {
+                ame_guard = BASIC_AME_GUARD * CLOCK_MULTIPLY;
+            }
+        }
+    }
+
     if (gura_vector == 0) {
         if (gura_translate < -7.5) {
             gura_vector = 1;
@@ -1044,9 +1278,69 @@ void gura_move_idleFunc() {
     }
 }
 
+
+/* diamond idle function */
+void diamond_move_idleFunc() {
+    int ame_y_detect = ame_jump_state / CLOCK_PER_JUMP_IMG;
+    for (int i = 0; i < DIAMOND_FULL; i++) {
+        if (diamond_bucket[i][1] != 0.0f) {
+            if (diamond_bucket[i][0] < -12.5) {
+                diamond_bucket[i][1] = 0;
+            }
+            else {
+                if (-3.77f <= diamond_bucket[i][0] && diamond_bucket[i][0] <= -2.77f) {
+                    if (diamond_bucket[i][1] == DIAMOND_DOWN && (ame_y_detect == 0 || ame_y_detect >= 13)) {
+                        if (the_world) {
+                            score += 2;
+                        }
+                        else {
+                            score += 7;
+                        }
+                        engine->play2D("object/coin.wav");
+                        diamond_bucket[i][1] = 0.0f;
+                    }
+                    else if(diamond_bucket[i][1] == DIAMOND_UP && (2 <= ame_y_detect && ame_y_detect <= 13)) {
+                        if (the_world) {
+                            score += 2;
+                        }
+                        else {
+                            score += 7;
+                        }
+                        engine->play2D("object/coin.wav");
+                        diamond_bucket[i][1] = 0.0f;
+                    }
+                }
+            }
+            diamond_bucket[i][0] -= diamond_step;
+        }
+    }
+}
+
+int diamond_frequence = 40 * CLOCK_MULTIPLY;
+int diamond_clock = 0;
+void diamond_bucket_idleFunc() {
+    if (diamond_clock == diamond_frequence) {
+        if (rand() % 5 != 1) {
+            for (int i = 0; i < DIAMOND_FULL; i++) {
+                if (diamond_bucket[i][1] == 0.0f) {
+                    diamond_bucket[i][0] = 12.5f;
+                    if (rand() % 2 == 0) {
+                        diamond_bucket[i][1] = DIAMOND_UP;
+                    }
+                    else {
+                        diamond_bucket[i][1] = DIAMOND_DOWN;
+                    }
+                    break;
+                }
+            }
+        }
+        diamond_clock = 0;
+    }
+    diamond_clock++;
+}
+
 /* background idle function */
 void bg_state_idleFunc() {
-    static float bg_translate_unit = 0.03 / CLOCK_MULTIPLY;
     if (bg_translate <= -26.0) {
         bg_state = (bg_state + 1) % BG_NUM;
         bg_translate = 0.0;
@@ -1055,7 +1349,6 @@ void bg_state_idleFunc() {
         bg_translate -= bg_translate_unit;
     }
 }
-
 
 void idleFunc() {
     if (start_flag == 1) {
@@ -1066,8 +1359,16 @@ void idleFunc() {
             ame_jump_state_idleFunc();
         }
         bg_state_idleFunc();
-        if (!the_world) {
-            gura_move_idleFunc();
+        diamond_move_idleFunc();
+        diamond_bucket_idleFunc();
+        gura_move_idleFunc();
+        kiara_move_idleFunc();
+        ame_guard_idleFunc();
+        if (the_world) {
+            the_world_idleFunc();
+        }
+        else {
+            out_of_the_world_idleFunc();
         }
     }
     else {
