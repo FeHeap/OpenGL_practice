@@ -229,7 +229,7 @@ enum ame_state {
     stand,
 } ame_state;
 /* unrivaled ame */
-#define BASIC_AME_GUARD 80
+#define BASIC_AME_GUARD 75
 int ame_guard = 0;
 void ame_guard_idleFunc() {
     if (ame_guard > 0) {
@@ -279,18 +279,26 @@ void diamond_init() {
         diamond_bucket[i][1] = 0;
     }
 }
-// bubba
+/* bubba */
 GLuint bubba;
 
 /* start */
 GLuint ame_head;
 GLuint ame_talk;
-GLuint sm_texture[4];
-int sm_state = 0;
+GLuint sttm_texture[4];
+int sttm_state = 0;
 int start_mark_appear = 1;
+/* stop */
+GLuint stpm_texture[4];
+int stpm_state = 0;
+
+/* manu */
+GLuint menu_texture[4];
+int menu_state = 0;
 
 /* control */
 int start_flag = 0;
+int stop_flag = 0;
 int the_world = 0;
 
 /* the world */
@@ -495,8 +503,43 @@ void init(void)
             exit(0);
         }
         // Create Texture
-        glGenTextures(1, sm_texture + i);
-        glBindTexture(GL_TEXTURE_2D, sm_texture[i]);
+        glGenTextures(1, sttm_texture + i);
+        glBindTexture(GL_TEXTURE_2D, sttm_texture[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
+        free(image1);
+    }
+    /* stop mark */
+    strcpy(strBuff, "Background/stop_mark_0.bmp");
+    for (int i = 0; i < 4; i++) {
+        strBuff[21] = i + '0';
+        Image* image1 = loadTexture((char*)strBuff, 0, 0);
+        if (image1 == NULL) {
+            printf("Image was not returned from loadTexture\n");
+            exit(0);
+        }
+        // Create Texture
+        glGenTextures(1, stpm_texture + i);
+        glBindTexture(GL_TEXTURE_2D, stpm_texture[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
+        free(image1);
+    }
+
+    /* menu mark */
+    strcpy(strBuff, "Background/menu_mark_0.bmp");
+    for (int i = 0; i < 4; i++) {
+        strBuff[21] = i + '0';
+        Image* image1 = loadTexture((char*)strBuff, 0, 0);
+        if (image1 == NULL) {
+            printf("Image was not returned from loadTexture\n");
+            exit(0);
+        }
+        // Create Texture
+        glGenTextures(1, menu_texture + i);
+        glBindTexture(GL_TEXTURE_2D, menu_texture[i]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
         glTexImage2D(GL_TEXTURE_2D, 0, 3, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
@@ -760,7 +803,7 @@ void score_display() {
     glPushMatrix();
     glColor4f(1.f, 1.f, 1.f, 1.f);
     glBindTexture(GL_TEXTURE_2D, ame_talk);
-    glTranslated(7.2, 4.2, 0);
+    glTranslated(6.2, 4.2, 0);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0, 0.0); glVertex3f(-1.0, -0.3, -0.99);
     glTexCoord2f(1.0, 0.0); glVertex3f(1.0, -0.3, -0.99);
@@ -843,6 +886,34 @@ void diamond_display() {
     glPopMatrix();
 }
 
+void stop_display() {
+    glPushMatrix();
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    glTranslated(8.0, 4.2, 0);
+    glBindTexture(GL_TEXTURE_2D, stpm_texture[stpm_state]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex3f(-0.4, -0.4, -0.999);
+    glTexCoord2f(1.0, 0.0); glVertex3f(0.4, -0.4, -0.999);
+    glTexCoord2f(1.0, 1.0); glVertex3f(0.4, 0.4, -0.999);
+    glTexCoord2f(0.0, 1.0); glVertex3f(-0.4, 0.4, -0.999);
+    glEnd();
+    glPopMatrix();
+}
+
+void menu_display() {
+    glPushMatrix();
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    glTranslated(8.0, 3.2, 0);
+    glBindTexture(GL_TEXTURE_2D, menu_texture[menu_state]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex3f(-0.4, -0.4, -0.999);
+    glTexCoord2f(1.0, 0.0); glVertex3f(0.4, -0.4, -0.999);
+    glTexCoord2f(1.0, 1.0); glVertex3f(0.4, 0.4, -0.999);
+    glTexCoord2f(0.0, 1.0); glVertex3f(-0.4, 0.4, -0.999);
+    glEnd();
+    glPopMatrix();
+}
+
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -850,8 +921,9 @@ void display(void) {
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_ALPHA_TEST);
+
+
     glColor4f(1.f, 1.f, 1.f, 1.f);
-    
     glPushMatrix();
     glTranslated(bg_translate, 0, 0);
     /* start mark */
@@ -860,7 +932,7 @@ void display(void) {
             start_mark_appear = 0;
         }
 
-        glBindTexture(GL_TEXTURE_2D, sm_texture[sm_state]);
+        glBindTexture(GL_TEXTURE_2D, sttm_texture[sttm_state]);
         glBegin(GL_QUADS);
         glTexCoord2f(0.0, 0.0); glVertex3f(-1.25, -0.75, -0.999);
         glTexCoord2f(1.0, 0.0); glVertex3f(1.25, -0.75, -0.999);
@@ -901,10 +973,15 @@ void display(void) {
     if (start_flag == 2) {
         talk_display();
     }
-    
+
+    /* score blood */
     if(start_flag == 1) {
         score_display();
         blood_display();
+        stop_display();
+        if (stop_flag == 1) {
+            menu_display();
+        }
     }
 
     
@@ -1100,7 +1177,7 @@ void keyboardArrayInit() {
 int multi_jump_boundary_early = (int)(8 * CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY);
 int multi_jump_boundary_last = (int)(12 * CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY);
 void keyboard(unsigned char key, int x, int y) {
-    if (start_flag == 1) {
+    if (start_flag == 1 && stop_flag == 0) {
         switch (key) {
         case ' ':
             if (ame_state == run) {
@@ -1181,7 +1258,7 @@ void keyboardUp(unsigned char key, int x, int y) {
 
 void keyboardIdle() {
     if (keyboardArray[' '] == 1 && ame_state == jump && multi_jump_boundary_early <= ame_jump_state && ame_jump_state <= multi_jump_boundary_last) {
-        ame_jump_state = 4;
+        ame_jump_state = 4 * CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY;
     }
 }
 
@@ -1193,27 +1270,109 @@ void mouse(int button, int state, int x, int y) {
 
     if (start_flag == 0) {
         if (WindowWidth / 2 - 85 <= x && x <= WindowWidth / 2 + 85 && WindowHeight / 2 - 65 <= y && y <= WindowHeight / 2 + 65 && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-            sm_state = 2;
+            sttm_state = 2;
         }
         if (WindowWidth / 2 - 85 <= x && x <= WindowWidth / 2 + 85 && WindowHeight / 2 - 65 <= y && y <= WindowHeight / 2 + 65 && button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-            sm_state = 3;
+            sttm_state = 3;
             start_flag = 2;
         }
-        else if (sm_state == 2 && button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-            sm_state = 1;
+        else if (sttm_state == 2 && button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+            sttm_state = 1;
+        }
+    }
+    else if (start_flag == 1) {
+        if (stop_flag == 1) {
+            if (WindowWidth * 0.9 <= x && x <= WindowWidth && WindowHeight * 0.1 <= y && y <= WindowHeight * 0.2 && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+                menu_state = 2;
+            }
+            if (WindowWidth * 0.9 <= x && x <= WindowWidth && WindowHeight * 0.1 <= y && y <= WindowHeight * 0.2 && button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+                menu_state = 3;
+                //start_flag = 2;
+            }
+            else if (sttm_state == 2 && button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+                menu_state = 1;
+            }
+        }
+
+        if (WindowWidth * 0.9 <= x && x <= WindowWidth && 0 <= y && y <= WindowHeight * 0.1 && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && stop_flag == 0) {
+            stpm_state = 2;
+        }
+        else if (WindowWidth * 0.9 <= x && x <= WindowWidth && 0 <= y && y <= WindowHeight * 0.1 && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && stop_flag == 1) {
+            stpm_state = 1;
+        }
+        if (WindowWidth * 0.9 <= x && x <= WindowWidth && 0 <= y && y <= WindowHeight * 0.1 && button == GLUT_LEFT_BUTTON && state == GLUT_UP && stpm_state == 2 && stop_flag == 0) {
+            stpm_state = 3;
+            stop_flag = 1;
+            menu_state = 0;
+        }
+        else if (WindowWidth * 0.9 <= x && x <= WindowWidth && 0 <= y && y <= WindowHeight * 0.1 && button == GLUT_LEFT_BUTTON && state == GLUT_UP && stpm_state == 2 && stop_flag == 1) {
+            stpm_state = 0;
+            stop_flag = 0;
+        }
+        else if (stpm_state == 2 && button == GLUT_LEFT_BUTTON && state == GLUT_UP && stop_flag == 0) {
+            stpm_state = 2;
+            stop_flag = 1;
+        }
+        else if (stpm_state == 1 && button == GLUT_LEFT_BUTTON && state == GLUT_UP && stop_flag == 1) {
+            stpm_state = 0;
+            stop_flag = 0;
         }
     }
 }
-void mouse_position_idleFunc() {
+void mouse_position_start_idleFunc() {
+    static POINT pt;
+    BOOL bReturn = GetCursorPos(&pt); //獲取滑鼠指標位置到pt
+    
+    //obtain window size
+    float WindowWidth = glutGet(GLUT_WINDOW_WIDTH);
+    float WindowHeight = glutGet(GLUT_WINDOW_HEIGHT);
+
+    //obtain window position
+    float WindowPosX = glutGet(GLUT_WINDOW_X);
+    float WindowPosY = glutGet(GLUT_WINDOW_Y);
+
+    if (bReturn != 0) { //如果函式執行成功
+        if (WindowPosX + WindowWidth/2 - 85 <= pt.x  && pt.x <= WindowPosX + WindowWidth/2 + 85 && WindowPosY + WindowHeight/2 - 65 <= pt.y && pt.y <= WindowPosY + WindowHeight/2 + 65 && (sttm_state == 0 || sttm_state == 1)) {
+            sttm_state = 1;
+        }
+        else if(sttm_state == 1) {
+            sttm_state = 0;
+        }
+    }
+}
+void mouse_position_stop_idleFunc() {
     static POINT pt;
     BOOL bReturn = GetCursorPos(&pt); //獲取滑鼠指標位置到pt
 
+    //obtain window size
+    float WindowWidth = glutGet(GLUT_WINDOW_WIDTH);
+    float WindowHeight = glutGet(GLUT_WINDOW_HEIGHT);
+
+    //obtain window position
+    float WindowPosX = glutGet(GLUT_WINDOW_X);
+    float WindowPosY = glutGet(GLUT_WINDOW_Y);
+
     if (bReturn != 0) { //如果函式執行成功
-        if (WIDTH - 85 <= pt.x  && pt.x <= WIDTH + 85 && HEIGHT - 65 <= pt.y && pt.y <= HEIGHT + 65 && (sm_state == 0 || sm_state == 1)) {
-            sm_state = 1;
+        if (stop_flag == 1) {
+            if (WindowPosX + WindowWidth * 0.9 <= pt.x && pt.x <= WindowPosX + WindowWidth && WindowPosY + WindowHeight * 0.1 <= pt.y && pt.y <= WindowPosY + WindowHeight * 0.2 && (menu_state == 0 || menu_state == 1)) {
+                menu_state = 1;
+            }
+            else if (menu_state == 1) {
+                menu_state = 0;
+            }
         }
-        else if(sm_state == 1) {
-            sm_state = 0;
+
+        if (stop_flag == 0 && WindowPosX + WindowWidth * 0.9 <= pt.x && pt.x <= WindowPosX + WindowWidth && WindowPosY <= pt.y && pt.y <= WindowPosY + WindowHeight * 0.1 && (stpm_state == 0 || stpm_state == 1)) {
+            stpm_state = 1;
+        }
+        else if (stop_flag == 0 && stpm_state == 1) {
+            stpm_state = 0;
+        }
+        else if (stop_flag == 1 && WindowPosX + WindowWidth * 0.9 <= pt.x && pt.x <= WindowPosX + WindowWidth && WindowPosY <= pt.y && pt.y <= WindowPosY + WindowHeight * 0.1 && (stpm_state == 3 || stpm_state == 2)) {
+            stpm_state = 2;
+        }
+        else if (stop_flag == 1 && stpm_state == 2) {
+            stpm_state = 3;
         }
     }
 }
@@ -1272,8 +1431,10 @@ void kiara_move_idleFunc() {
     }
 
     if (-3.67f < kiara_translate && kiara_translate < -2.87f) {
-        int ame_y_detect = ame_jump_state / CLOCK_PER_JUMP_IMG;
+        int ame_y_detect = (int)(ame_jump_state / (CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY));
         if ((2 <= ame_y_detect && ame_y_detect <= 13) && ame_guard == 0) {
+            engine->play2D("ame/middle_punch.wav");
+            engine->play2D("kiara/kiara_tskr.wav");
             blood -= 1;
             if (blood == 0) {
                 ame_guard = -1;
@@ -1305,8 +1466,15 @@ void gura_move_idleFunc() {
     }
 
     if (-3.62f < gura_translate && gura_translate < -2.92f) {
-        int ame_y_detect = ame_jump_state / CLOCK_PER_JUMP_IMG;
+        int ame_y_detect = (int)(ame_jump_state / (CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY));
         if ((ame_y_detect == 0 || ame_y_detect >= 13) && ame_guard == 0) {
+            engine->play2D("ame/middle_punch.wav");
+            if (rand() % 2 == 0) {
+                engine->play2D("gura/gura_fbi.wav");
+            }
+            else {
+                engine->play2D("gura/gura_goddemit.wav");
+            }
             blood -= 1;
             if (blood == 0) {
                 ame_guard = -1;
@@ -1338,7 +1506,7 @@ void gura_move_idleFunc() {
 
 /* diamond idle function */
 void diamond_move_idleFunc() {
-    int ame_y_detect = ame_jump_state / CLOCK_PER_JUMP_IMG;
+    int ame_y_detect = (int)(ame_jump_state / (CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY));
     for (int i = 0; i < DIAMOND_FULL; i++) {
         if (diamond_bucket[i][1] != 0.0f) {
             if (diamond_bucket[i][0] < -12.5) {
@@ -1418,34 +1586,38 @@ void bg_state_idleFunc() {
 
 void idleFunc() {
     if (start_flag == 1) {
-        if (ame_state == run) {
-            ame_run_state_idleFunc();
+        if (stop_flag == 0) {
+            if (ame_state == run) {
+                ame_run_state_idleFunc();
+            }
+            else if (ame_state == jump) {
+                ame_jump_state_idleFunc();
+            }
+            bg_state_idleFunc();
+            diamond_move_idleFunc();
+            diamond_bucket_idleFunc();
+            diamond_float_idleFunc();
+            gura_move_idleFunc();
+            kiara_move_idleFunc();
+            ame_guard_idleFunc();
+            keyboardIdle();
+            if (the_world) {
+                the_world_idleFunc();
+            }
+            else {
+                out_of_the_world_idleFunc();
+            }
         }
-        else if (ame_state == jump) {
-            ame_jump_state_idleFunc();
-        }
-        bg_state_idleFunc();
-        diamond_move_idleFunc();
-        diamond_bucket_idleFunc();
-        diamond_float_idleFunc();
-        gura_move_idleFunc();
-        kiara_move_idleFunc();
-        ame_guard_idleFunc();
-        keyboardIdle();
-        if (the_world) {
-            the_world_idleFunc();
-        }
-        else {
-            out_of_the_world_idleFunc();
-        }
+        mouse_position_stop_idleFunc();
     }
     else {
         ame_stand_state_idleFunc();
-        mouse_position_idleFunc();
+        mouse_position_start_idleFunc();
     }
-        
-    gura_state_idleFunc();
-    kiara_idleFunc();
+    if (stop_flag == 0) {
+        gura_state_idleFunc();
+        kiara_idleFunc();
+    }
     
     glutPostRedisplay();
 }
