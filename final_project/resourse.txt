@@ -1,6 +1,7 @@
 <graph>
 https://walfiegif.wordpress.com/
 https://www.youtube.com/channel/UCyl1z3jo3XHR1riLFKG5UAg
+https://www.minecraft.net/zh-hant
 
 <sound>
 <https://dova-s.jp/bgm/>
