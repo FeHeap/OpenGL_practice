@@ -22,8 +22,9 @@
 #define WIDTH   960
 #define HEIGHT  540
 
-// clock (float)
-#define CLOCK_MULTIPLY 1.0
+
+// sleep clock(int)
+#define SLEEP_CLOCK 0 //15?
 
 // start up the engine
 irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
@@ -244,7 +245,7 @@ GLuint gura_texture[GURA_IMG_NUM];
 int gura_state = 0;
 float gura_translate = 3.0;
 int gura_vector = 0;
-float gura_translate_unit = 0.045 / CLOCK_MULTIPLY;
+float gura_translate_unit = 0.045;
 
 /* kiara */
 #define KIARA_IMG_NUM 3
@@ -252,7 +253,7 @@ float gura_translate_unit = 0.045 / CLOCK_MULTIPLY;
 GLuint kiara_texture[KIARA_IMG_NUM];
 int kiara_state = 0;
 float kiara_translate = 5.0;
-float kiara_translate_unit = 0.05 / CLOCK_MULTIPLY;
+float kiara_translate_unit = 0.05;
 
 /* background */
 #define BG_NUM 5
@@ -261,7 +262,7 @@ GLuint bg_texture[BG_NUM][2];
 GLuint bg_ame[AME_BG_NUM];
 int bg_state = 0;
 float bg_translate = 0.0;
-float bg_translate_unit = 0.03 / CLOCK_MULTIPLY;
+float bg_translate_unit = 0.03;
 
 /* object */
 // diamond
@@ -270,7 +271,7 @@ float bg_translate_unit = 0.03 / CLOCK_MULTIPLY;
 #define DIAMOND_DOWN -2.6f
 GLuint diamond;
 float diamond_bucket[DIAMOND_FULL][2];
-float diamond_step = 0.023 / CLOCK_MULTIPLY;
+float diamond_step = 0.023;
 int float_diamond_state = 0;
 float float_diamond = 0.0;
 void diamond_init() {
@@ -295,6 +296,40 @@ int stpm_state = 0;
 /* manu */
 GLuint menu_texture[4];
 int menu_state = 0;
+GLuint restart;
+int err_lots_count = 0;
+int err_lots[] = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                1,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                         1, 0, 0, 0, 0, 0, 0, 0, 0,
+                                             1, 0, 0, 0, 0,
+                                                 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+                                                 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
+                                                 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+                                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+int err_lots_full = sizeof(err_lots) / sizeof(int);
+GLuint blue;
+int blue_count = 0;
+int black_count = 0;
 
 /* control */
 int start_flag = 0;
@@ -317,7 +352,7 @@ void the_world_idleFunc() {
             }
         }
         the_world_voice_count--;
-        if (the_world_voice_count < THE_WORLD_BASIC_COUNT * CLOCK_MULTIPLY / 2) {
+        if (the_world_voice_count < THE_WORLD_BASIC_COUNT / 2) {
             gura_translate_unit *= 0.96;
             kiara_translate_unit *= 0.96;
         }
@@ -330,8 +365,8 @@ void out_of_the_world_idleFunc() {
         gura_translate_unit *= 1.042;
         kiara_translate_unit *= 1.042;
         if (the_world_voice_count == 0) {
-            gura_translate_unit = 0.05 / CLOCK_MULTIPLY;
-            kiara_translate_unit = 0.055 / CLOCK_MULTIPLY;
+            gura_translate_unit = 0.05;
+            kiara_translate_unit = 0.055;
         }
     }
 }
@@ -573,6 +608,34 @@ void init(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
     glTexImage2D(GL_TEXTURE_2D, 0, 2, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
     free(image1);
+
+    /* restart */
+    image1 = loadTexture((char*)"restart/restart_error.bmp", 1, 0);
+    if (image1 == NULL) {
+        printf("Image was not returned from loadTexture\n");
+        exit(0);
+    }
+    // Create Texture
+    glGenTextures(1, &restart);
+    glBindTexture(GL_TEXTURE_2D, restart);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
+    glTexImage2D(GL_TEXTURE_2D, 0, 2, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
+    free(image1);
+
+    /* blue */
+    image1 = loadTexture((char*)"restart/restart_blue.bmp", 0, 0);
+    if (image1 == NULL) {
+        printf("Image was not returned from loadTexture\n");
+        exit(0);
+    }
+    // Create Texture
+    glGenTextures(1, &blue);
+    glBindTexture(GL_TEXTURE_2D, blue);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
+    free(image1);
     
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ALPHA);
     glAlphaFunc(GL_GREATER, .8f);
@@ -592,7 +655,7 @@ void init(void)
 int talk_state = 0;
 int voice_state[6] = { 0, 0, 0, 0, 0, 0 };
 int words_length_state[6] = { 1, 1, 1, 1, 1, 1 };
-int word_clock = (int)(4 * CLOCK_MULTIPLY);
+int word_clock = 4;
 void talk_display() {
     /* ame head */
     glPushMatrix();
@@ -914,6 +977,9 @@ void menu_display() {
     glPopMatrix();
 }
 
+/* restart process */
+void restart_process();
+
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -975,20 +1041,78 @@ void display(void) {
     }
 
     /* score blood */
-    if(start_flag == 1) {
+    if (start_flag == 1) {
         score_display();
         blood_display();
         stop_display();
         if (stop_flag == 1) {
+            if (menu_state == 3) {
+                glPushMatrix();
+                for (int i = 0, windows_error_count = 0; i < err_lots_count; i++) {
+                    if (err_lots[i] == 1) {
+                        if (err_lots_count != err_lots_full) {
+                            windows_error_count++;
+                            glBindTexture(GL_TEXTURE_2D, restart);
+                            glBegin(GL_QUADS);
+                            glTexCoord2f(0.0, 0.0); glVertex3f(-1.25, -0.75, 0.00003);
+                            glTexCoord2f(1.0, 0.0); glVertex3f(1.25, -0.75, 0.00003);
+                            glTexCoord2f(1.0, 1.0); glVertex3f(1.25, 0.75, 0.00003);
+                            glTexCoord2f(0.0, 1.0); glVertex3f(-1.25, 0.75, 0.00003);
+                            glEnd();
+                            if (windows_error_count % 72 == 0) {
+                                glTranslated(-16, 0, 0);
+                            }
+                            else if (windows_error_count % 18 == 0) {
+                                glTranslated(2.5, 0, 0);
+                            }
+                            else if (windows_error_count % 9 == 0) {
+                                glTranslated(-8, 8, 0.000001);
+                            }
+                            else {
+                                glTranslated(0.5, -0.5, 0.000001);
+                            }
+                        }
+                        else {
+                            if (blue_count < 200) {
+                                glBindTexture(GL_TEXTURE_2D, blue);
+                                glBegin(GL_QUADS);
+                                glTexCoord2f(0.0, 0.0); glVertex3f(-6.4, -3.6, 0.00003);
+                                glTexCoord2f(1.0, 0.0); glVertex3f(6.4, -3.6, 0.00003);
+                                glTexCoord2f(1.0, 1.0); glVertex3f(6.4, 3.6, 0.00003);
+                                glTexCoord2f(0.0, 1.0); glVertex3f(-6.4, 3.6, 0.00003);
+                                glEnd();
+                                blue_count++;
+                            }
+                            else {
+                                if (blue_count == 200) {
+                                    Sleep(2000);
+                                    blue_count++;
+                                }
+                                if (black_count == 2) {
+                                    restart_process();
+                                }
+                                glColor4f(0.f, 0.f, 0.f, 1.f);
+                                glBegin(GL_QUADS);
+                                glVertex3f(-6.4, -3.6, 0.00003);
+                                glVertex3f(6.4, -3.6, 0.00003);
+                                glVertex3f(6.4, 3.6, 0.00003);
+                                glVertex3f(-6.4, 3.6, 0.00003);
+                                glEnd();
+                                black_count++;
+                            }
+                        }
+                    }
+                }
+                glPopMatrix();
+            }
             menu_display();
         }
     }
-
     
-
-    static float run_per_img = CLOCK_PER_RUN_IMG * CLOCK_MULTIPLY;
-    static float jump_per_img = CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY;
-    static float stand_per_img = CLOCK_PER_STAND_IMG * CLOCK_MULTIPLY;
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    static float run_per_img = CLOCK_PER_RUN_IMG;
+    static float jump_per_img = CLOCK_PER_JUMP_IMG;
+    static float stand_per_img = CLOCK_PER_STAND_IMG;
     glPushMatrix();
     glTranslated(-4.0, -3.1, 0);
     if (ame_guard <= 0) {
@@ -1082,7 +1206,7 @@ void display(void) {
     }
     glPopMatrix();
     
-    static float gura_per_img = CLOCK_PER_GURA_IMG * CLOCK_MULTIPLY;
+    static float gura_per_img = CLOCK_PER_GURA_IMG;
     glPushMatrix();
     glTranslated(gura_translate, -3.1, 0);
     if (!the_world) { glColor4f(1.f, 1.f, 1.f, 1.f); }
@@ -1107,7 +1231,7 @@ void display(void) {
         glEnable(GL_ALPHA_TEST);
     }
     else {
-        glBindTexture(GL_TEXTURE_2D, gura_texture[(int)(gura_state / (CLOCK_PER_GURA_IMG * CLOCK_MULTIPLY))]);
+        glBindTexture(GL_TEXTURE_2D, gura_texture[(int)(gura_state / CLOCK_PER_GURA_IMG)]);
         glBegin(GL_QUADS);
         glTexCoord2f(1.0, 0.0); glVertex3f(0.0, -0.1, 0.0);
         glTexCoord2f(0.0, 0.0); glVertex3f(1.2, -0.1, 0.0);
@@ -1127,7 +1251,7 @@ void display(void) {
     }
     glPopMatrix();
 
-    static float kiara_per_img = CLOCK_PER_KIARA_IMG * CLOCK_MULTIPLY;
+    static float kiara_per_img = CLOCK_PER_KIARA_IMG;
     glPushMatrix();
     glTranslated(kiara_translate, -1.5, 0);
     if (!the_world) { glColor4f(1.f, 1.f, 1.f, 1.f); }
@@ -1174,8 +1298,8 @@ void keyboardArrayInit() {
         keyboardArray[i] = 0;
     }
 }
-int multi_jump_boundary_early = (int)(8 * CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY);
-int multi_jump_boundary_last = (int)(12 * CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY);
+int multi_jump_boundary_early = 8 * CLOCK_PER_JUMP_IMG;
+int multi_jump_boundary_last = 12 * CLOCK_PER_JUMP_IMG;
 void keyboard(unsigned char key, int x, int y) {
     if (start_flag == 1 && stop_flag == 0) {
         switch (key) {
@@ -1206,13 +1330,13 @@ void keyboard(unsigned char key, int x, int y) {
         case 'F':
             if (start_mark_appear == 0) {
                 if (!the_world) {
-                    the_world_voice_count = THE_WORLD_BASIC_COUNT * CLOCK_MULTIPLY;
+                    the_world_voice_count = THE_WORLD_BASIC_COUNT;
                     the_world = 1;
                     PlaySound(L"ame/Giornos_Theme_Il_vento_doro.wav", NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
                     engine->play2D("ame/za_warudo_stop_time_sound.mp3");
                 }
                 else if (the_world && the_world_voice_count == 0) {
-                    the_world_voice_count = THE_WORLD_BASIC_COUNT_RE * CLOCK_MULTIPLY;
+                    the_world_voice_count = THE_WORLD_BASIC_COUNT_RE;
                     the_world = 0;
                     engine->play2D("ame/za_warudo_the_world_time_resume.mp3");
                     PlaySound(L"ame/Amelia_Watsons_BGM.wav", NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
@@ -1258,7 +1382,7 @@ void keyboardUp(unsigned char key, int x, int y) {
 
 void keyboardIdle() {
     if (keyboardArray[' '] == 1 && ame_state == jump && multi_jump_boundary_early <= ame_jump_state && ame_jump_state <= multi_jump_boundary_last) {
-        ame_jump_state = 4 * CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY;
+        ame_jump_state = 4 * CLOCK_PER_JUMP_IMG;
     }
 }
 
@@ -1280,14 +1404,14 @@ void mouse(int button, int state, int x, int y) {
             sttm_state = 1;
         }
     }
-    else if (start_flag == 1) {
+    else if (start_flag == 1 && menu_state != 3) {
         if (stop_flag == 1) {
             if (WindowWidth * 0.9 <= x && x <= WindowWidth && WindowHeight * 0.1 <= y && y <= WindowHeight * 0.2 && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
                 menu_state = 2;
             }
             if (WindowWidth * 0.9 <= x && x <= WindowWidth && WindowHeight * 0.1 <= y && y <= WindowHeight * 0.2 && button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
                 menu_state = 3;
-                //start_flag = 2;
+                PlaySound(NULL, NULL, NULL);
             }
             else if (sttm_state == 2 && button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
                 menu_state = 1;
@@ -1352,7 +1476,7 @@ void mouse_position_stop_idleFunc() {
     float WindowPosX = glutGet(GLUT_WINDOW_X);
     float WindowPosY = glutGet(GLUT_WINDOW_Y);
 
-    if (bReturn != 0) { //如果函式執行成功
+    if (bReturn != 0 && menu_state != 3) { //如果函式執行成功
         if (stop_flag == 1) {
             if (WindowPosX + WindowWidth * 0.9 <= pt.x && pt.x <= WindowPosX + WindowWidth && WindowPosY + WindowHeight * 0.1 <= pt.y && pt.y <= WindowPosY + WindowHeight * 0.2 && (menu_state == 0 || menu_state == 1)) {
                 menu_state = 1;
@@ -1380,7 +1504,7 @@ void mouse_position_stop_idleFunc() {
 
 /* ame idle function */
 void ame_stand_state_idleFunc() {
-    static int ame_stand_state_boundary = (int)(STAND_IMG_NUM * CLOCK_PER_STAND_IMG * CLOCK_MULTIPLY) - 1;
+    static int ame_stand_state_boundary = (int)(STAND_IMG_NUM * CLOCK_PER_STAND_IMG) - 1;
     if (ame_stand_state == ame_stand_state_boundary) {
         ame_stand_state = 0;
     }
@@ -1390,7 +1514,7 @@ void ame_stand_state_idleFunc() {
 }
 
 void ame_run_state_idleFunc() {
-    static int ame_run_state_boundary = (int)(CLOCK_PER_RUN_IMG * RUN_IMG_NUM * CLOCK_MULTIPLY) - 1;
+    static int ame_run_state_boundary = (int)(CLOCK_PER_RUN_IMG * RUN_IMG_NUM) - 1;
     if (ame_run_state == ame_run_state_boundary) {
         ame_run_state = 0;
     }
@@ -1400,8 +1524,8 @@ void ame_run_state_idleFunc() {
 }
 
 void ame_jump_state_idleFunc() {
-    static int ame_jump_state_boundary = (int)(JUMP_IMG_NUM * CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY);
-    static int ame_jump_down = (int)(14 * CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY);
+    static int ame_jump_state_boundary = (int)(JUMP_IMG_NUM * CLOCK_PER_JUMP_IMG);
+    static int ame_jump_down = 14 * CLOCK_PER_JUMP_IMG;
     if (ame_jump_state == ame_jump_state_boundary) {
         ame_jump_state = 0;
         ame_state = run;
@@ -1416,7 +1540,7 @@ void ame_jump_state_idleFunc() {
 
 /* kiara idle function */
 void kiara_idleFunc() {
-    static int kiara_state_boundary = ((int)(KIARA_IMG_NUM * CLOCK_PER_KIARA_IMG * CLOCK_MULTIPLY) - 1);
+    static int kiara_state_boundary = ((int)(KIARA_IMG_NUM * CLOCK_PER_KIARA_IMG) - 1);
     if (kiara_state == kiara_state_boundary) {
         kiara_state = 0;
     }
@@ -1431,7 +1555,7 @@ void kiara_move_idleFunc() {
     }
 
     if (-3.67f < kiara_translate && kiara_translate < -2.87f) {
-        int ame_y_detect = (int)(ame_jump_state / (CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY));
+        int ame_y_detect = (int)(ame_jump_state / CLOCK_PER_JUMP_IMG);
         if ((2 <= ame_y_detect && ame_y_detect <= 13) && ame_guard == 0) {
             engine->play2D("ame/middle_punch.wav");
             engine->play2D("kiara/kiara_tskr.wav");
@@ -1440,7 +1564,7 @@ void kiara_move_idleFunc() {
                 ame_guard = -1;
             }
             else {
-                ame_guard = BASIC_AME_GUARD * CLOCK_MULTIPLY;
+                ame_guard = BASIC_AME_GUARD;
             }
         }
     }
@@ -1450,7 +1574,7 @@ void kiara_move_idleFunc() {
 
 /* gura idle function */
 void gura_state_idleFunc() {
-    static int gura_state_boundary = ((int)(GURA_IMG_NUM * CLOCK_PER_GURA_IMG * CLOCK_MULTIPLY) - 1);
+    static int gura_state_boundary = ((int)(GURA_IMG_NUM * CLOCK_PER_GURA_IMG) - 1);
     if (gura_state == gura_state_boundary) {
         gura_state = 0;
     }
@@ -1460,13 +1584,13 @@ void gura_state_idleFunc() {
 }
 
 void gura_move_idleFunc() {
-    static int gura_vector_point = (int)(79 * CLOCK_MULTIPLY);
+    static int gura_vector_point = 79;
     if (!the_world && rand() % gura_vector_point == 1) {
         gura_vector = !gura_vector;
     }
 
     if (-3.62f < gura_translate && gura_translate < -2.92f) {
-        int ame_y_detect = (int)(ame_jump_state / (CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY));
+        int ame_y_detect = (int)(ame_jump_state / CLOCK_PER_JUMP_IMG);
         if ((ame_y_detect == 0 || ame_y_detect >= 13) && ame_guard == 0) {
             engine->play2D("ame/middle_punch.wav");
             if (rand() % 2 == 0) {
@@ -1480,7 +1604,7 @@ void gura_move_idleFunc() {
                 ame_guard = -1;
             }
             else {
-                ame_guard = BASIC_AME_GUARD * CLOCK_MULTIPLY;
+                ame_guard = BASIC_AME_GUARD;
             }
         }
     }
@@ -1506,7 +1630,7 @@ void gura_move_idleFunc() {
 
 /* diamond idle function */
 void diamond_move_idleFunc() {
-    int ame_y_detect = (int)(ame_jump_state / (CLOCK_PER_JUMP_IMG * CLOCK_MULTIPLY));
+    int ame_y_detect = (int)(ame_jump_state / CLOCK_PER_JUMP_IMG);
     for (int i = 0; i < DIAMOND_FULL; i++) {
         if (diamond_bucket[i][1] != 0.0f) {
             if (diamond_bucket[i][0] < -12.5) {
@@ -1541,7 +1665,7 @@ void diamond_move_idleFunc() {
     }
 }
 
-int diamond_frequence = 40 * CLOCK_MULTIPLY;
+int diamond_frequence = 40;
 int diamond_clock = 0;
 void diamond_bucket_idleFunc() {
     if (diamond_clock == diamond_frequence) {
@@ -1564,12 +1688,23 @@ void diamond_bucket_idleFunc() {
     diamond_clock++;
 }
 
-
 void diamond_float_idleFunc() {
     float_diamond_state += 1;
-    float_diamond = 0.02 * cos(0.062831 * float_diamond_state / CLOCK_MULTIPLY);
-    if (float_diamond_state == 100 * CLOCK_MULTIPLY) {
+    float_diamond = 0.02 * cos(0.062831 * float_diamond_state);
+    if (float_diamond_state == 100) {
         float_diamond_state = 0;
+    }
+}
+
+
+void menu_idleFunc() {
+    if (menu_state == 3) {
+        if (err_lots[err_lots_count] == 1) {
+            engine->play2D("restart/erro.wav");
+        }
+        if (err_lots_count < err_lots_full) {
+            err_lots_count++;
+        }
     }
 }
 
@@ -1585,6 +1720,7 @@ void bg_state_idleFunc() {
 }
 
 void idleFunc() {
+    Sleep(SLEEP_CLOCK);
     if (start_flag == 1) {
         if (stop_flag == 0) {
             if (ame_state == run) {
@@ -1608,6 +1744,9 @@ void idleFunc() {
                 out_of_the_world_idleFunc();
             }
         }
+        else {
+            menu_idleFunc();
+        }
         mouse_position_stop_idleFunc();
     }
     else {
@@ -1620,6 +1759,11 @@ void idleFunc() {
     }
     
     glutPostRedisplay();
+}
+
+/* restart process */
+void restart_process() {
+
 }
 
 int main(int argc, char** argv)
