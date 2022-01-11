@@ -155,7 +155,7 @@ Image* loadTexture(char* fileName, int character, int negative) {
 #endif
 
 COLORREF m_FontColor = RGB(0, 0, 0);
-void DrawString(float x, float y, float z, const char* strText, int length) {
+void DrawString(float x, float y, float z, const char* strText, int length, int size_inverse = 15) {
     HDC hDC = wglGetCurrentDC();
     int xx;
     float r, g, b;
@@ -172,7 +172,7 @@ void DrawString(float x, float y, float z, const char* strText, int length) {
     glPushAttrib(GL_LIST_BIT);  // Pushes The Display List Bits  
 
     HFONT hOldFont, hFont;
-    hFont = ::CreateFont(glutGet(GLUT_WINDOW_HEIGHT)/15, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, 0,
+    hFont = ::CreateFont(glutGet(GLUT_WINDOW_HEIGHT)/size_inverse, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, 0,
         ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("Segoe Print"));
     hOldFont = (HFONT)::SelectObject(hDC, hFont);
 
@@ -238,6 +238,17 @@ void ame_guard_idleFunc() {
         ame_guard--;
     }
 }
+enum ame_dead_state {
+    live,
+    gura,
+    kiara,
+} ame_dead_state;
+#define DEAD_AMIMA_CLOCK_GURA 3
+#define DEAD_AMIMA_CLOCK_KIARA 5
+GLuint ame_dead_gura[12];
+GLuint ame_dead_kiara[8];
+int ame_dead_gura_state = 0;
+int ame_dead_kiara_state = 0;
 void ame_init() {
     ame_state = stand;
     ame_stand_state = 0;
@@ -246,12 +257,15 @@ void ame_init() {
     ame_jump_flag = 0;
     guard_color_state = 0;
     ame_guard = 0;
+    ame_dead_state = live;
+    ame_dead_gura_state = 0;
+    ame_dead_kiara_state = 0;
 }
 
 /* gura */
 #define GURA_IMG_NUM 3
 #define CLOCK_PER_GURA_IMG 2
-float gura_move_unit = 0.045f;
+float gura_move_unit = 0.05f;
 GLuint gura_texture[GURA_IMG_NUM];
 int gura_state = 0;
 float gura_translate = 3.0;
@@ -260,22 +274,24 @@ void gura_init() {
     gura_state = 0;
     gura_translate = 3.0;
     gura_vector = 0;
+    gura_move_unit = 0.05f;
 }
 
 /* kiara */
 #define KIARA_IMG_NUM 3
 #define CLOCK_PER_KIARA_IMG 2
-float kiara_move_unit = 0.05f;
+float kiara_move_unit = 0.055;
 GLuint kiara_texture[KIARA_IMG_NUM];
 int kiara_state = 0;
 float kiara_translate = 5.0;
 void kiara_init() {
     kiara_state = 0;
     kiara_translate = 5.0;
+    kiara_move_unit = 0.055;
 }
 
 /* background */
-#define BG_NUM 5
+#define BG_NUM 7
 #define AME_BG_NUM 7
 #define BG_TRANSLATE_UNIT 0.03
 GLuint bg_texture[BG_NUM][2];
@@ -432,6 +448,7 @@ void init(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
     glTexImage2D(GL_TEXTURE_2D, 0, 3, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
     free(image1);
+
     /* ame talk */
     strcpy(strBuff, "ame/ame_talk.bmp");
     image1 = loadTexture((char*)strBuff, 0, 0);
@@ -466,6 +483,7 @@ void init(void)
         free(image1);
     }
     ame_state = stand;
+    ame_dead_state = live;
 
     /* ame run */
     strcpy(strBuff, "ame/ame-run-0.bmp");
@@ -539,7 +557,8 @@ void init(void)
     strcpy(strBuff, "Background/BG_00.bmp");
     for (int i = 0; i < BG_NUM; i++) {
         for (int j = 0; j < 2; j++) {
-            strBuff[15] = i + '0';
+            strBuff[14] = i/10 + '0';
+            strBuff[15] = i%10 + '0';
             Image* image1 = loadTexture((char*)strBuff, 0, j);
             if (image1 == NULL) {
                 printf("Image was not returned from loadTexture\n");
@@ -679,6 +698,44 @@ void init(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
     glTexImage2D(GL_TEXTURE_2D, 0, 3, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
     free(image1);
+
+    /* gura dead */
+    strcpy(strBuff, "gura/gura_rotate_00.bmp");
+    for (int i = 0; i < 12; i++) {
+        strBuff[17] = '0' + i / 10;
+        strBuff[18] = '0' + i % 10;
+        Image* image1 = loadTexture((char*)strBuff, 0, 0);
+        if (image1 == NULL) {
+            printf("Image was not returned from loadTexture\n");
+            exit(0);
+        }
+        // Create Texture
+        glGenTextures(1, ame_dead_gura + i);
+        glBindTexture(GL_TEXTURE_2D, ame_dead_gura[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
+        free(image1);
+    }
+
+    /* kiara dead */
+    strcpy(strBuff, "kiara/kiara_walk_0.bmp");
+    for (int i = 0; i < 8; i++) {
+        strBuff[17] = '0' + i;
+        Image* image1 = loadTexture((char*)strBuff, 0, 0);
+        if (image1 == NULL) {
+            printf("Image was not returned from loadTexture\n");
+            exit(0);
+        }
+        // Create Texture
+        glGenTextures(1, ame_dead_kiara + i);
+        glBindTexture(GL_TEXTURE_2D, ame_dead_kiara[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
+        free(image1);
+    }
+
     
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ALPHA);
     glAlphaFunc(GL_GREATER, .8f);
@@ -928,6 +985,19 @@ void score_display() {
     glColor4f(1.f, 1.f, 1.f, 1.f);
     glPopMatrix();
 }
+void dead_score_display() {
+    static char score_buff[7] = "000000";
+    static char score_s[] = "score";
+    static char restart_comment[] = "press 'R' to restart the game";
+    glPushMatrix();
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    sprintf(score_buff, "%06d", score);
+    DrawString(3.6, 0.2, 0.00006, score_s, strlen(score_s), 10);
+    DrawString(3.2, -0.2, 0.00006, score_buff, strlen(score_buff), 10);
+    DrawString(-6.2, 0.0, 0.00006, restart_comment, strlen(restart_comment), 16);
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    glPopMatrix();
+}
 void score_init() {
     score = 0;
 }
@@ -1037,6 +1107,67 @@ void menu_display() {
 /* restart process */
 void restart_process();
 
+void restart_press_display() {
+    glPushMatrix();
+    for (int i = 0, windows_error_count = 0; i < err_lots_count; i++) {
+        if (err_lots[i] == 1) {
+            if (err_lots_count != err_lots_full) {
+                windows_error_count++;
+                glBindTexture(GL_TEXTURE_2D, restart);
+                glBegin(GL_QUADS);
+                glTexCoord2f(0.0, 0.0); glVertex3f(-1.25, -0.75, 0.00003);
+                glTexCoord2f(1.0, 0.0); glVertex3f(1.25, -0.75, 0.00003);
+                glTexCoord2f(1.0, 1.0); glVertex3f(1.25, 0.75, 0.00003);
+                glTexCoord2f(0.0, 1.0); glVertex3f(-1.25, 0.75, 0.00003);
+                glEnd();
+                if (windows_error_count % 72 == 0) {
+                    glTranslated(-16, 0, 0);
+                }
+                else if (windows_error_count % 18 == 0) {
+                    glTranslated(2.5, 0, 0);
+                }
+                else if (windows_error_count % 9 == 0) {
+                    glTranslated(-8, 8, 0.000001);
+                }
+                else {
+                    glTranslated(0.5, -0.5, 0.000001);
+                }
+            }
+            else {
+                if (blue_count < 200) {
+                    glBindTexture(GL_TEXTURE_2D, blue);
+                    glBegin(GL_QUADS);
+                    glTexCoord2f(0.0, 0.0); glVertex3f(-6.8, -3.6, 0.00003);
+                    glTexCoord2f(1.0, 0.0); glVertex3f(6.8, -3.6, 0.00003);
+                    glTexCoord2f(1.0, 1.0); glVertex3f(6.8, 3.6, 0.00003);
+                    glTexCoord2f(0.0, 1.0); glVertex3f(-6.8, 3.6, 0.00003);
+                    glEnd();
+                    blue_count++;
+                }
+                else {
+                    if (blue_count == 200) {
+                        Sleep(2000);
+                        blue_count++;
+                    }
+                    if (black_count == 10000) {
+                        restart_process();
+                    }
+                    glColor4f(0.f, 0.f, 0.f, 1.f);
+                    glBegin(GL_QUADS);
+                    glVertex3f(-6.8, -3.6, 0.00004);
+                    glVertex3f(6.8, -3.6, 0.00004);
+                    glVertex3f(6.8, 3.6, 0.00004);
+                    glVertex3f(-6.8, 3.6, 0.00004);
+                    glEnd();
+                    black_count++;
+                }
+            }
+        }
+    }
+    glPopMatrix();
+}
+
+/* main display */
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -1103,66 +1234,38 @@ void display(void) {
         blood_display();
         stop_display();
         if (stop_flag == 1) {
-            if (menu_state == 3) {
-                glPushMatrix();
-                for (int i = 0, windows_error_count = 0; i < err_lots_count; i++) {
-                    if (err_lots[i] == 1) {
-                        if (err_lots_count != err_lots_full) {
-                            windows_error_count++;
-                            glBindTexture(GL_TEXTURE_2D, restart);
-                            glBegin(GL_QUADS);
-                            glTexCoord2f(0.0, 0.0); glVertex3f(-1.25, -0.75, 0.00003);
-                            glTexCoord2f(1.0, 0.0); glVertex3f(1.25, -0.75, 0.00003);
-                            glTexCoord2f(1.0, 1.0); glVertex3f(1.25, 0.75, 0.00003);
-                            glTexCoord2f(0.0, 1.0); glVertex3f(-1.25, 0.75, 0.00003);
-                            glEnd();
-                            if (windows_error_count % 72 == 0) {
-                                glTranslated(-16, 0, 0);
-                            }
-                            else if (windows_error_count % 18 == 0) {
-                                glTranslated(2.5, 0, 0);
-                            }
-                            else if (windows_error_count % 9 == 0) {
-                                glTranslated(-8, 8, 0.000001);
-                            }
-                            else {
-                                glTranslated(0.5, -0.5, 0.000001);
-                            }
-                        }
-                        else {
-                            if (blue_count < 200) {
-                                glBindTexture(GL_TEXTURE_2D, blue);
-                                glBegin(GL_QUADS);
-                                glTexCoord2f(0.0, 0.0); glVertex3f(-6.4, -3.6, 0.00003);
-                                glTexCoord2f(1.0, 0.0); glVertex3f(6.4, -3.6, 0.00003);
-                                glTexCoord2f(1.0, 1.0); glVertex3f(6.4, 3.6, 0.00003);
-                                glTexCoord2f(0.0, 1.0); glVertex3f(-6.4, 3.6, 0.00003);
-                                glEnd();
-                                blue_count++;
-                            }
-                            else {
-                                if (blue_count == 200) {
-                                    Sleep(2000);
-                                    blue_count++;
-                                }
-                                if (black_count == 10000) {
-                                    restart_process();
-                                }
-                                glColor4f(0.f, 0.f, 0.f, 1.f);
-                                glBegin(GL_QUADS);
-                                glVertex3f(-6.4, -3.6, 0.00004);
-                                glVertex3f(6.4, -3.6, 0.00004);
-                                glVertex3f(6.4, 3.6, 0.00004);
-                                glVertex3f(-6.4, 3.6, 0.00004);
-                                glEnd();
-                                black_count++;
-                            }
-                        }
-                    }
+            if (ame_dead_state == live) {
+                if (menu_state == 3) {
+                    restart_press_display();
                 }
-                glPopMatrix();
+                menu_display();
             }
-            menu_display();
+            else {
+                glDisable(GL_TEXTURE_2D);
+                glColor4f(1.f, 1.f, 1.f, 1.f);
+                glBegin(GL_QUADS);
+                glVertex3f(-6.8, -3.6, 0.00004);
+                glVertex3f(6.8, -3.6, 0.00004);
+                glVertex3f(6.8, 3.6, 0.00004);
+                glVertex3f(-6.8, 3.6, 0.00004);
+                glEnd();
+                dead_score_display();
+                glEnable(GL_TEXTURE_2D);
+                
+                glColor4f(1.f, 1.f, 1.f, 1.f);
+                if (ame_dead_state == gura) {
+                    glBindTexture(GL_TEXTURE_2D, ame_dead_gura[ame_dead_gura_state / DEAD_AMIMA_CLOCK_GURA]);
+                }
+                else if (ame_dead_state == kiara) {
+                    glBindTexture(GL_TEXTURE_2D, ame_dead_kiara[ame_dead_kiara_state / DEAD_AMIMA_CLOCK_KIARA]);
+                }
+                glBegin(GL_QUADS);
+                glTexCoord2f(0.0, 0.0); glVertex3f(-3.0, -3.0, 0.00005);
+                glTexCoord2f(1.0, 0.0); glVertex3f(3.0, -3.0, 0.00005);
+                glTexCoord2f(1.0, 1.0); glVertex3f(3.0, 3.0, 0.00005);
+                glTexCoord2f(0.0, 1.0); glVertex3f(-3.0, 3.0, 0.00005);
+                glEnd();
+            }
         }
     }
     
@@ -1427,6 +1530,12 @@ void keyboardUp(unsigned char key, int x, int y) {
         case ' ':
             keyboardArray[' '] = 0;
             break;
+        case 'r':
+        case 'R':
+            if (stop_flag == 1 && ame_dead_state != live) {
+                restart_process();
+            }
+            break;
         default: // pass
             break;
         }
@@ -1450,6 +1559,7 @@ void mouse(int button, int state, int x, int y) {
             sttm_state = 2;
         }
         if (WindowWidth / 2 - 85 <= x && x <= WindowWidth / 2 + 85 && WindowHeight / 2 - 65 <= y && y <= WindowHeight / 2 + 65 && button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+            engine->play2D("Background/start_button.wav");
             sttm_state = 3;
             start_flag = 2;
         }
@@ -1458,7 +1568,7 @@ void mouse(int button, int state, int x, int y) {
         }
     }
     else if (start_flag == 1 && menu_state != 3) {
-        if (stop_flag == 1) {
+        if (ame_dead_state == live && stop_flag == 1) {
             if (WindowWidth * 0.9 <= x && x <= WindowWidth && WindowHeight * 0.1 <= y && y <= WindowHeight * 0.2 && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
                 menu_state = 2;
             }
@@ -1466,7 +1576,7 @@ void mouse(int button, int state, int x, int y) {
                 menu_state = 3;
                 PlaySound(NULL, NULL, NULL);
             }
-            else if (sttm_state == 2 && button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+            else if (menu_state == 2 && button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
                 menu_state = 1;
             }
         }
@@ -1474,7 +1584,7 @@ void mouse(int button, int state, int x, int y) {
         if (WindowWidth * 0.9 <= x && x <= WindowWidth && 0 <= y && y <= WindowHeight * 0.1 && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && stop_flag == 0) {
             stpm_state = 2;
         }
-        else if (WindowWidth * 0.9 <= x && x <= WindowWidth && 0 <= y && y <= WindowHeight * 0.1 && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && stop_flag == 1) {
+        else if (WindowWidth * 0.9 <= x && x <= WindowWidth && 0 <= y && y <= WindowHeight * 0.1 && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && ame_dead_state == live && stop_flag == 1) {
             stpm_state = 1;
         }
         if (WindowWidth * 0.9 <= x && x <= WindowWidth && 0 <= y && y <= WindowHeight * 0.1 && button == GLUT_LEFT_BUTTON && state == GLUT_UP && stpm_state == 2 && stop_flag == 0) {
@@ -1482,7 +1592,7 @@ void mouse(int button, int state, int x, int y) {
             stop_flag = 1;
             menu_state = 0;
         }
-        else if (WindowWidth * 0.9 <= x && x <= WindowWidth && 0 <= y && y <= WindowHeight * 0.1 && button == GLUT_LEFT_BUTTON && state == GLUT_UP && stpm_state == 2 && stop_flag == 1) {
+        else if (WindowWidth * 0.9 <= x && x <= WindowWidth && 0 <= y && y <= WindowHeight * 0.1 && button == GLUT_LEFT_BUTTON && state == GLUT_UP && stpm_state == 2 && ame_dead_state == live && stop_flag == 1) {
             stpm_state = 0;
             stop_flag = 0;
         }
@@ -1490,7 +1600,7 @@ void mouse(int button, int state, int x, int y) {
             stpm_state = 2;
             stop_flag = 1;
         }
-        else if (stpm_state == 1 && button == GLUT_LEFT_BUTTON && state == GLUT_UP && stop_flag == 1) {
+        else if (stpm_state == 1 && button == GLUT_LEFT_BUTTON && state == GLUT_UP && ame_dead_state == live && stop_flag == 1) {
             stpm_state = 0;
             stop_flag = 0;
         }
@@ -1509,7 +1619,11 @@ void mouse_position_start_idleFunc() {
     float WindowPosY = glutGet(GLUT_WINDOW_Y);
 
     if (bReturn != 0) { //如果函式執行成功
-        if (WindowPosX + WindowWidth/2 - 85 <= pt.x  && pt.x <= WindowPosX + WindowWidth/2 + 85 && WindowPosY + WindowHeight/2 - 65 <= pt.y && pt.y <= WindowPosY + WindowHeight/2 + 65 && (sttm_state == 0 || sttm_state == 1)) {
+        if (WindowPosX + WindowWidth/2 - 85 <= pt.x  && pt.x <= WindowPosX + WindowWidth/2 + 85 && WindowPosY + WindowHeight/2 - 65 <= pt.y && pt.y <= WindowPosY + WindowHeight/2 + 65 && sttm_state == 0) {
+            engine->play2D("Background/start_button_float.wav");
+            sttm_state = 1;
+        }
+        else if (WindowPosX + WindowWidth / 2 - 85 <= pt.x && pt.x <= WindowPosX + WindowWidth / 2 + 85 && WindowPosY + WindowHeight / 2 - 65 <= pt.y && pt.y <= WindowPosY + WindowHeight / 2 + 65 && sttm_state == 1) {
             sttm_state = 1;
         }
         else if(sttm_state == 1) {
@@ -1530,7 +1644,7 @@ void mouse_position_stop_idleFunc() {
     float WindowPosY = glutGet(GLUT_WINDOW_Y);
 
     if (bReturn != 0 && menu_state != 3) { //如果函式執行成功
-        if (stop_flag == 1) {
+        if (ame_dead_state == live && stop_flag == 1) {
             if (WindowPosX + WindowWidth * 0.9 <= pt.x && pt.x <= WindowPosX + WindowWidth && WindowPosY + WindowHeight * 0.1 <= pt.y && pt.y <= WindowPosY + WindowHeight * 0.2 && (menu_state == 0 || menu_state == 1)) {
                 menu_state = 1;
             }
@@ -1545,10 +1659,10 @@ void mouse_position_stop_idleFunc() {
         else if (stop_flag == 0 && stpm_state == 1) {
             stpm_state = 0;
         }
-        else if (stop_flag == 1 && WindowPosX + WindowWidth * 0.9 <= pt.x && pt.x <= WindowPosX + WindowWidth && WindowPosY <= pt.y && pt.y <= WindowPosY + WindowHeight * 0.1 && (stpm_state == 3 || stpm_state == 2)) {
+        else if (ame_dead_state == live && stop_flag == 1 && WindowPosX + WindowWidth * 0.9 <= pt.x && pt.x <= WindowPosX + WindowWidth && WindowPosY <= pt.y && pt.y <= WindowPosY + WindowHeight * 0.1 && (stpm_state == 3 || stpm_state == 2)) {
             stpm_state = 2;
         }
-        else if (stop_flag == 1 && stpm_state == 2) {
+        else if (ame_dead_state == live && stop_flag == 1 && stpm_state == 2) {
             stpm_state = 3;
         }
     }
@@ -1615,6 +1729,9 @@ void kiara_move_idleFunc() {
             blood -= 1;
             if (blood == 0) {
                 ame_guard = -1;
+                ame_dead_state = kiara;
+                stop_flag = 1;
+                PlaySound(L"kiara/kiara_never_gonna_give_you_up.wav", NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
             }
             else {
                 ame_guard = BASIC_AME_GUARD;
@@ -1655,6 +1772,9 @@ void gura_move_idleFunc() {
             blood -= 1;
             if (blood == 0) {
                 ame_guard = -1;
+                ame_dead_state = gura;
+                stop_flag = 1;
+                PlaySound(L"gura/gura_john_cena.wav", NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
             }
             else {
                 ame_guard = BASIC_AME_GUARD;
@@ -1759,6 +1879,15 @@ void menu_idleFunc() {
     }
 }
 
+void dead_anima_idleFunc() {
+    if (ame_dead_state == gura) {
+        ame_dead_gura_state = (ame_dead_gura_state + 1) % (12 * DEAD_AMIMA_CLOCK_GURA);
+    }
+    else if (ame_dead_state == kiara) {
+        ame_dead_kiara_state = (ame_dead_kiara_state + 1) % (8 * DEAD_AMIMA_CLOCK_KIARA);
+    }
+}
+
 /* background idle function */
 void bg_state_idleFunc() {
     if (bg_translate <= -26.0) {
@@ -1796,7 +1925,12 @@ void idleFunc() {
             }
         }
         else {
-            menu_idleFunc();
+            if (ame_dead_state == live) {
+                menu_idleFunc();
+            }
+            else {
+                dead_anima_idleFunc();
+            }
         }
         mouse_position_stop_idleFunc();
     }
@@ -1833,7 +1967,7 @@ int main(int argc, char** argv)
     glutInitWindowSize(WIDTH, HEIGHT);		// set the size of Window
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-    glutCreateWindow("Texture Mapping - Programming Techniques");
+    glutCreateWindow("Crazy Ame");
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(myReshape);
