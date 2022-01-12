@@ -1447,6 +1447,7 @@ void myReshape(int width, int height) {
     glMatrixMode(GL_MODELVIEW);
 }
 
+#define ESC 27
 #define keyboardArraySize 500
 int keyboardArray[keyboardArraySize];
 void keyboardArrayInit() {
@@ -1536,6 +1537,17 @@ void keyboardUp(unsigned char key, int x, int y) {
                 restart_process();
             }
             break;
+        case ESC: // "esc" on keyboard
+            if (start_flag == 1 && ame_dead_state == live) {
+                if (stop_flag == 0) {
+                    stop_flag = 1;
+                    stpm_state = 3;
+                }
+                else {
+                    stop_flag = 0;
+                    stpm_state = 0;
+                }
+            }
         default: // pass
             break;
         }
