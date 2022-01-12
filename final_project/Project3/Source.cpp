@@ -27,7 +27,7 @@
 #define SLEEP_CLOCK 0 //15?
 
 // start up the engine
-irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
+irrklang::ISoundEngine * engine = irrklang::createIrrKlangDevice();
 
 typedef struct Image {
     unsigned long sizeX;
@@ -99,12 +99,12 @@ int ImageLoad(char* filename, Image* image, int character, int negative) {
         image->data[i] = image->data[i + 2];
         image->data[i + 2] = temp;
     }
-    
-    
+
+
 
     // we're done.
-    char* tempData = (char*)malloc(((size)*4/3) * sizeof(char));
-    for (i = 0, j = 0; i < size; i += 3, j+= 4) {
+    char* tempData = (char*)malloc(((size) * 4 / 3) * sizeof(char));
+    for (i = 0, j = 0; i < size; i += 3, j += 4) {
         if (negative == 0) {
             tempData[j] = image->data[i];
             tempData[j + 1] = image->data[i + 1];
@@ -115,7 +115,7 @@ int ImageLoad(char* filename, Image* image, int character, int negative) {
             tempData[j + 1] = 255 - image->data[i + 1];
             tempData[j + 2] = 255 - image->data[i + 2];
         }
-        if (tempData[j] == 0 && tempData[j+1] == 0 && tempData[j+2] == 0 && character == 1) {
+        if (tempData[j] == 0 && tempData[j + 1] == 0 && tempData[j + 2] == 0 && character == 1) {
             tempData[j + 3] = 0x00;
             tempData[j] = 255;
             tempData[j + 1] = 255;
@@ -172,7 +172,7 @@ void DrawString(float x, float y, float z, const char* strText, int length, int 
     glPushAttrib(GL_LIST_BIT);  // Pushes The Display List Bits  
 
     HFONT hOldFont, hFont;
-    hFont = ::CreateFont(glutGet(GLUT_WINDOW_HEIGHT)/size_inverse, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, 0,
+    hFont = ::CreateFont(glutGet(GLUT_WINDOW_HEIGHT) / size_inverse, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, 0,
         ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("Segoe Print"));
     hOldFont = (HFONT)::SelectObject(hDC, hFont);
 
@@ -220,7 +220,7 @@ int ame_run_state = 0;
 #define JUMP_IMG_NUM 23
 #define CLOCK_PER_JUMP_IMG 3
 int jump_i;
-GLuint ame_jump_texture;
+GLuint ame_jump_texture[24];
 int ame_jump_state = 0;
 int ame_jump_flag = 0;
 float ame_jump_height[29] = {
@@ -344,10 +344,10 @@ GLuint menu_texture[4];
 int menu_state = 0;
 GLuint restart;
 int err_lots_count = 0;
-const int err_lots[] = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+const int err_lots[] = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 1,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -434,7 +434,7 @@ void the_world_init() {
 void init(void)
 {
     char strBuff[50];
-    
+
     /* ame head */
     strcpy(strBuff, "ame/ame_head.bmp");
     Image* image1 = loadTexture((char*)strBuff, 0, 0);
@@ -489,14 +489,14 @@ void init(void)
     /* ame run */
     strcpy(strBuff, "ame/ame-run-0.bmp");
     for (int i = 0; i < 7; i++) {
-        strBuff[12] = i+'0';
+        strBuff[12] = i + '0';
         Image* image1 = loadTexture((char*)strBuff, 1, 0);
         if (image1 == NULL) {
             printf("Image was not returned from loadTexture\n");
             exit(0);
         }
         // Create Texture
-        glGenTextures(1, ame_run_texture+i);
+        glGenTextures(1, ame_run_texture + i);
         glBindTexture(GL_TEXTURE_2D, ame_run_texture[i]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
@@ -505,18 +505,23 @@ void init(void)
     }
 
     /* ame jump */
-    image1 = loadTexture((char*)"ame/ame-jump.bmp", 1, 0);
-    if (image1 == NULL) {
-        printf("Image was not returned from loadTexture\n");
-        exit(0);
+    strcpy(strBuff, "ame/ame-jump-00.bmp");
+    for (int i = 0; i <= JUMP_IMG_NUM; i++) {
+        strBuff[13] = '0' + i / 10;
+        strBuff[14] = '0' + i % 10;
+        Image* image1 = loadTexture((char*)strBuff, 1, 0);
+        if (image1 == NULL) {
+            printf("Image was not returned from loadTexture\n");
+            exit(0);
+        }
+        // Create Texture
+        glGenTextures(1, ame_jump_texture + i);
+        glBindTexture(GL_TEXTURE_2D, ame_jump_texture[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
+        glTexImage2D(GL_TEXTURE_2D, 0, 2, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
+        free(image1);
     }
-    // Create Texture
-    glGenTextures(1, &ame_jump_texture);
-    glBindTexture(GL_TEXTURE_2D, ame_jump_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
-    glTexImage2D(GL_TEXTURE_2D, 0, 2, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
-    free(image1);
 
     /* gura */
     strcpy(strBuff, "gura/gura-0.bmp");
@@ -553,13 +558,13 @@ void init(void)
         glTexImage2D(GL_TEXTURE_2D, 0, 2, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
         free(image1);
     }
-    
+
     /* Background */
     strcpy(strBuff, "Background/BG_00.bmp");
     for (int i = 0; i < BG_NUM; i++) {
         for (int j = 0; j < 2; j++) {
-            strBuff[14] = i/10 + '0';
-            strBuff[15] = i%10 + '0';
+            strBuff[14] = i / 10 + '0';
+            strBuff[15] = i % 10 + '0';
             Image* image1 = loadTexture((char*)strBuff, 0, j);
             if (image1 == NULL) {
                 printf("Image was not returned from loadTexture\n");
@@ -583,7 +588,7 @@ void init(void)
             exit(0);
         }
         // Create Texture
-        glGenTextures(1, bg_ame+i);
+        glGenTextures(1, bg_ame + i);
         glBindTexture(GL_TEXTURE_2D, bg_ame[i]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //scale linearly when image bigger than texture
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //scale linearly when image smalled than texture
@@ -643,7 +648,7 @@ void init(void)
         glTexImage2D(GL_TEXTURE_2D, 0, 3, image1->sizeX, image1->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1->data);
         free(image1);
     }
-    
+
     /* Diamond */
     image1 = loadTexture((char*)"object/Diamond.bmp", 1, 0);
     if (image1 == NULL) {
@@ -737,10 +742,10 @@ void init(void)
         free(image1);
     }
 
-    
+
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ALPHA);
     glAlphaFunc(GL_GREATER, .8f);
-    
+
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glShadeModel(GL_FLAT);
@@ -804,9 +809,9 @@ void talk_display() {
                 DrawString(-3.0, 1.60, 0.2, Talk.talk_0[2], strlen(Talk.talk_0[2]));
                 glTranslated(4.4, 1.5, 0.2);
                 glBegin(GL_TRIANGLES);
-                    glVertex3f(-0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glVertex3f(-0.15f, 0.0f, 0.2f);
+                glVertex3f(0.15f, 0.0f, 0.2f);
+                glVertex3f(0.0f, -0.10f, 0.2f);
                 glEnd();
             }
             if (voice_state[0] == 0) {
@@ -836,9 +841,9 @@ void talk_display() {
                 DrawString(-3.0, 1.60, 0.2, Talk.talk_1[2], strlen(Talk.talk_1[2]));
                 glTranslated(4.4, 1.5, 0.2);
                 glBegin(GL_TRIANGLES);
-                    glVertex3f(-0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glVertex3f(-0.15f, 0.0f, 0.2f);
+                glVertex3f(0.15f, 0.0f, 0.2f);
+                glVertex3f(0.0f, -0.10f, 0.2f);
                 glEnd();
             }
             if (voice_state[1] == 0) {
@@ -861,9 +866,9 @@ void talk_display() {
                 DrawString(-3.0, 2.05, 0.2, Talk.talk_2[1], strlen(Talk.talk_2[1]));
                 glTranslated(4.4, 1.5, 0.2);
                 glBegin(GL_TRIANGLES);
-                    glVertex3f(-0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glVertex3f(-0.15f, 0.0f, 0.2f);
+                glVertex3f(0.15f, 0.0f, 0.2f);
+                glVertex3f(0.0f, -0.10f, 0.2f);
                 glEnd();
             }
             if (voice_state[2] == 0) {
@@ -886,9 +891,9 @@ void talk_display() {
                 DrawString(-3.0, 2.05, 0.2, Talk.talk_3[1], strlen(Talk.talk_3[1]));
                 glTranslated(4.4, 1.5, 0.2);
                 glBegin(GL_TRIANGLES);
-                    glVertex3f(-0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glVertex3f(-0.15f, 0.0f, 0.2f);
+                glVertex3f(0.15f, 0.0f, 0.2f);
+                glVertex3f(0.0f, -0.10f, 0.2f);
                 glEnd();
             }
             if (voice_state[3] == 0) {
@@ -918,9 +923,9 @@ void talk_display() {
                 DrawString(-3.0, 1.60, 0.2, Talk.talk_4[2], strlen(Talk.talk_4[2]));
                 glTranslated(4.4, 1.5, 0.2);
                 glBegin(GL_TRIANGLES);
-                    glVertex3f(-0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glVertex3f(-0.15f, 0.0f, 0.2f);
+                glVertex3f(0.15f, 0.0f, 0.2f);
+                glVertex3f(0.0f, -0.10f, 0.2f);
                 glEnd();
             }
             if (voice_state[4] == 0) {
@@ -943,9 +948,9 @@ void talk_display() {
                 DrawString(-3.0, 2.05, 0.2, Talk.talk_5[1], strlen(Talk.talk_5[1]));
                 glTranslated(4.4, 1.5, 0.2);
                 glBegin(GL_TRIANGLES);
-                    glVertex3f(-0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.15f, 0.0f, 0.2f);
-                    glVertex3f(0.0f, -0.10f, 0.2f);
+                glVertex3f(-0.15f, 0.0f, 0.2f);
+                glVertex3f(0.15f, 0.0f, 0.2f);
+                glVertex3f(0.0f, -0.10f, 0.2f);
                 glEnd();
             }
             if (voice_state[5] == 0) {
@@ -1028,7 +1033,7 @@ void blood_display() {
     glPopMatrix();
 }
 void blood_init() {
-   blood = BLOOD_MAX;
+    blood = BLOOD_MAX;
 }
 
 /* diamond */
@@ -1252,7 +1257,7 @@ void display(void) {
                 glEnd();
                 dead_score_display();
                 glEnable(GL_TEXTURE_2D);
-                
+
                 glColor4f(1.f, 1.f, 1.f, 1.f);
                 if (ame_dead_state == gura) {
                     glBindTexture(GL_TEXTURE_2D, ame_dead_gura[ame_dead_gura_state / DEAD_AMIMA_CLOCK_GURA]);
@@ -1269,7 +1274,7 @@ void display(void) {
             }
         }
     }
-    
+
     glColor4f(1.f, 1.f, 1.f, 1.f);
     glPushMatrix();
     glTranslated(-4.0, -3.1, 0);
@@ -1278,7 +1283,7 @@ void display(void) {
     }
     else {
         for (int i = 0; i < 40; i++) {
-            glColor4f(1.f, 1.f, 1.f-40*0.01, 1.f);
+            glColor4f(1.f, 1.f, 1.f - 40 * 0.01, 1.f);
         }
         if (guard_color_state = 0) {
             glColor4f(1.f, 1.f, 1.f, 1.f);
@@ -1319,25 +1324,24 @@ void display(void) {
         glEnable(GL_ALPHA_TEST);
     }
     else if (ame_state == jump) {
-        float jumpTectureX = 0.03 + ((ame_jump_state) % 6) * 0.16666667, jumpTectureY = 1.0 - (ame_jump_state / 6) * 0.2;
         glPushMatrix();
         glTranslated(0.0, ame_jump_height[ame_jump_state], 0);
-        glBindTexture(GL_TEXTURE_2D, ame_jump_texture);
+        glBindTexture(GL_TEXTURE_2D, ame_jump_texture[ame_jump_state]);
         glBegin(GL_QUADS);
-        glTexCoord2f(jumpTectureX, jumpTectureY - 0.2); glVertex2f(1.5, -0.1);
-        glTexCoord2f(jumpTectureX + 0.16666667, jumpTectureY - 0.2); glVertex2f(0.0, -0.1);
-        glTexCoord2f(jumpTectureX + 0.16666667, jumpTectureY); glVertex2f(0.0, 2);
-        glTexCoord2f(jumpTectureX, jumpTectureY); glVertex2f(1.5, 2);
+        glTexCoord2f(0, 0); glVertex2f(1.5, -0.1);
+        glTexCoord2f(1, 0); glVertex2f(0.0, -0.1);
+        glTexCoord2f(1, 1); glVertex2f(0.0, 2);
+        glTexCoord2f(0, 1); glVertex2f(1.5, 2);
         glEnd();
         glPopMatrix();
 
         glDisable(GL_ALPHA_TEST);
         glBegin(GL_QUADS);
         glColor4f(0.f, 0.f, 0.f, 0.2f);
-        glTexCoord2f(jumpTectureX, jumpTectureY - 0.2); glVertex2f(0.0, 0.0);
-        glTexCoord2f(jumpTectureX + 0.16666667, jumpTectureY - 0.2); glVertex2f(1.5, 0.0);
-        glTexCoord2f(jumpTectureX + 0.16666667, jumpTectureY); glVertex2f(0.75, -0.76);
-        glTexCoord2f(jumpTectureX, jumpTectureY); glVertex2f(-0.75, -0.76);
+        glTexCoord2f(0, 0); glVertex2f(0.0, 0.0);
+        glTexCoord2f(1, 0); glVertex2f(1.5, 0.0);
+        glTexCoord2f(1, 1); glVertex2f(0.75, -0.76);
+        glTexCoord2f(0, 1); glVertex2f(-0.75, -0.76);
         glEnd();
         glEnable(GL_ALPHA_TEST);
     }
@@ -1362,7 +1366,7 @@ void display(void) {
         glEnable(GL_ALPHA_TEST);
     }
     glPopMatrix();
-    
+
 
     glPushMatrix();
     glTranslated(gura_translate, -3.1, 0);
@@ -1432,10 +1436,10 @@ void display(void) {
     glEnd();
     glEnable(GL_ALPHA_TEST);
     glPopMatrix();
-    
+
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
-    
+
 
     glutSwapBuffers();
 }
@@ -1481,7 +1485,7 @@ void keyboard(unsigned char key, int x, int y) {
                 jump_i = 0;
                 keyboardArray[' '] = 1;
             }
-            else if (ame_state == jump && multi_jump_boundary_early <= ame_jump_state && ame_jump_state <= multi_jump_boundary_last) {
+            else if (ame_state == jump) {
                 keyboardArray[' '] = 1;
             }
             break;
@@ -1506,7 +1510,7 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         }
     }
-    else if(start_flag == 2) {
+    else if (start_flag == 2) {
         switch (key) {
         case ' ':
             if (words_length_state[talk_state] / WORD_CLOCK < Talk.talks_end[talk_state]) {
@@ -1557,7 +1561,7 @@ void keyboardUp(unsigned char key, int x, int y) {
 }
 
 void keyboardIdle() {
-    if (keyboardArray[' '] == 1 && ame_state == jump && multi_jump_boundary_early <= ame_jump_state && ame_jump_state <= multi_jump_boundary_last) {
+    if (keyboardArray[' '] == 1 && multi_jump_boundary_early <= ame_jump_state && ame_jump_state <= multi_jump_boundary_last) {
         ame_jump_state = 4;
     }
 }
@@ -1622,8 +1626,8 @@ void mouse(int button, int state, int x, int y) {
 }
 void mouse_position_start_idleFunc() {
     static POINT pt;
-    BOOL bReturn = GetCursorPos(&pt); //獲取滑鼠指標位置到pt
-    
+    BOOL bReturn = GetCursorPos(&pt); //?脣?皛???雿蔭?郡t
+
     //obtain window size
     float WindowWidth = glutGet(GLUT_WINDOW_WIDTH);
     float WindowHeight = glutGet(GLUT_WINDOW_HEIGHT);
@@ -1632,22 +1636,22 @@ void mouse_position_start_idleFunc() {
     float WindowPosX = glutGet(GLUT_WINDOW_X);
     float WindowPosY = glutGet(GLUT_WINDOW_Y);
 
-    if (bReturn != 0) { //如果函式執行成功
-        if (WindowPosX + WindowWidth/2 - 85 <= pt.x  && pt.x <= WindowPosX + WindowWidth/2 + 85 && WindowPosY + WindowHeight/2 - 65 <= pt.y && pt.y <= WindowPosY + WindowHeight/2 + 65 && sttm_state == 0) {
+    if (bReturn != 0) { //憒??賢??瑁???
+        if (WindowPosX + WindowWidth / 2 - 85 <= pt.x && pt.x <= WindowPosX + WindowWidth / 2 + 85 && WindowPosY + WindowHeight / 2 - 65 <= pt.y && pt.y <= WindowPosY + WindowHeight / 2 + 65 && sttm_state == 0) {
             engine->play2D("Background/start_button_float.wav");
             sttm_state = 1;
         }
         else if (WindowPosX + WindowWidth / 2 - 85 <= pt.x && pt.x <= WindowPosX + WindowWidth / 2 + 85 && WindowPosY + WindowHeight / 2 - 65 <= pt.y && pt.y <= WindowPosY + WindowHeight / 2 + 65 && sttm_state == 1) {
             sttm_state = 1;
         }
-        else if(sttm_state == 1) {
+        else if (sttm_state == 1) {
             sttm_state = 0;
         }
     }
 }
 void mouse_position_stop_idleFunc() {
     static POINT pt;
-    BOOL bReturn = GetCursorPos(&pt); //獲取滑鼠指標位置到pt
+    BOOL bReturn = GetCursorPos(&pt); //?脣?皛???雿蔭?郡t
 
     //obtain window size
     float WindowWidth = glutGet(GLUT_WINDOW_WIDTH);
@@ -1657,7 +1661,7 @@ void mouse_position_stop_idleFunc() {
     float WindowPosX = glutGet(GLUT_WINDOW_X);
     float WindowPosY = glutGet(GLUT_WINDOW_Y);
 
-    if (bReturn != 0 && menu_state != 3) { //如果函式執行成功
+    if (bReturn != 0 && menu_state != 3) { //憒??賢??瑁???
         if (ame_dead_state == live && stop_flag == 1) {
             if (WindowPosX + WindowWidth * 0.9 <= pt.x && pt.x <= WindowPosX + WindowWidth && WindowPosY + WindowHeight * 0.1 <= pt.y && pt.y <= WindowPosY + WindowHeight * 0.2 && (menu_state == 0 || menu_state == 1)) {
                 menu_state = 1;
@@ -1831,7 +1835,7 @@ void diamond_move_idleFunc() {
                         engine->play2D("object/coin.wav");
                         diamond_bucket[i][1] = 0.0f;
                     }
-                    else if(diamond_bucket[i][1] == DIAMOND_UP && (2 <= ame_jump_state && ame_jump_state <= 13)) {
+                    else if (diamond_bucket[i][1] == DIAMOND_UP && (2 <= ame_jump_state && ame_jump_state <= 13)) {
                         if (the_world) {
                             score += 2;
                         }
@@ -1922,6 +1926,7 @@ void idleFunc() {
                     ame_jump_state_idleFunc();
                     jump_i = 0;
                 }
+                keyboardIdle();
             }
             bg_state_idleFunc();
             diamond_move_idleFunc();
@@ -1930,7 +1935,6 @@ void idleFunc() {
             gura_move_idleFunc();
             kiara_move_idleFunc();
             ame_guard_idleFunc();
-            keyboardIdle();
             if (the_world) {
                 the_world_idleFunc();
             }
@@ -1956,7 +1960,7 @@ void idleFunc() {
         gura_state_idleFunc();
         kiara_idleFunc();
     }
-    
+
     glutPostRedisplay();
 }
 
@@ -1988,7 +1992,7 @@ int main(int argc, char** argv)
     glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyboardUp);
     glutMouseFunc(mouse);
-    
+
     glutIdleFunc(idleFunc);
     glutMainLoop();
     return 0;
