@@ -219,6 +219,7 @@ GLuint ame_run_texture[RUN_IMG_NUM];
 int ame_run_state = 0;
 #define JUMP_IMG_NUM 23
 #define CLOCK_PER_JUMP_IMG 3
+int jump_i;
 GLuint ame_jump_texture;
 int ame_jump_state = 0;
 int ame_jump_flag = 0;
@@ -1318,9 +1319,9 @@ void display(void) {
         glEnable(GL_ALPHA_TEST);
     }
     else if (ame_state == jump) {
-        float jumpTectureX = 0.03 + ((ame_jump_state / CLOCK_PER_JUMP_IMG) % 6) * 0.16666667, jumpTectureY = 1.0 - (ame_jump_state / CLOCK_PER_JUMP_IMG / 6) * 0.2;
+        float jumpTectureX = 0.03 + ((ame_jump_state) % 6) * 0.16666667, jumpTectureY = 1.0 - (ame_jump_state / 6) * 0.2;
         glPushMatrix();
-        glTranslated(0.0, ame_jump_height[ame_jump_state / CLOCK_PER_JUMP_IMG], 0);
+        glTranslated(0.0, ame_jump_height[ame_jump_state], 0);
         glBindTexture(GL_TEXTURE_2D, ame_jump_texture);
         glBegin(GL_QUADS);
         glTexCoord2f(jumpTectureX, jumpTectureY - 0.2); glVertex2f(1.5, -0.1);
@@ -1455,8 +1456,8 @@ void keyboardArrayInit() {
         keyboardArray[i] = 0;
     }
 }
-const int multi_jump_boundary_early = 8 * CLOCK_PER_JUMP_IMG;
-const int multi_jump_boundary_last = 12 * CLOCK_PER_JUMP_IMG;
+const int multi_jump_boundary_early = 8;
+const int multi_jump_boundary_last = 12;
 void keyboard(unsigned char key, int x, int y) {
     if (start_flag == 1 && stop_flag == 0) {
         switch (key) {
@@ -1477,6 +1478,7 @@ void keyboard(unsigned char key, int x, int y) {
                     }
                 }
                 ame_state = jump;
+                jump_i = 0;
                 keyboardArray[' '] = 1;
             }
             else if (ame_state == jump && multi_jump_boundary_early <= ame_jump_state && ame_jump_state <= multi_jump_boundary_last) {
@@ -1556,7 +1558,7 @@ void keyboardUp(unsigned char key, int x, int y) {
 
 void keyboardIdle() {
     if (keyboardArray[' '] == 1 && ame_state == jump && multi_jump_boundary_early <= ame_jump_state && ame_jump_state <= multi_jump_boundary_last) {
-        ame_jump_state = 4 * CLOCK_PER_JUMP_IMG;
+        ame_jump_state = 4;
     }
 }
 
@@ -1702,16 +1704,15 @@ void ame_run_state_idleFunc() {
     }
 }
 
+#define AME_JUMP_DOWN 14
 void ame_jump_state_idleFunc() {
-    static int ame_jump_state_boundary = JUMP_IMG_NUM * CLOCK_PER_JUMP_IMG;
-    static int ame_jump_down = 14 * CLOCK_PER_JUMP_IMG;
-    if (ame_jump_state == ame_jump_state_boundary) {
+    if (ame_jump_state == JUMP_IMG_NUM) {
         ame_jump_state = 0;
         ame_state = run;
     }
     else {
         ame_jump_state++;
-        if (ame_jump_state == ame_jump_down) {
+        if (ame_jump_state == AME_JUMP_DOWN) {
             engine->play2D("ame/ame_jump_down.wav");
         }
     }
@@ -1734,8 +1735,7 @@ void kiara_move_idleFunc() {
     }
 
     if (-3.67f < kiara_translate && kiara_translate < -2.87f) {
-        int ame_y_detect = ame_jump_state / CLOCK_PER_JUMP_IMG;
-        if ((2 <= ame_y_detect && ame_y_detect <= 13) && ame_guard == 0) {
+        if ((2 <= ame_jump_state && ame_jump_state <= 13) && ame_guard == 0) {
             engine->play2D("ame/middle_punch.wav");
             engine->play2D("kiara/kiara_tskr.wav");
             blood -= 1;
@@ -1772,8 +1772,7 @@ void gura_move_idleFunc() {
     }
 
     if (-3.62f < gura_translate && gura_translate < -2.92f) {
-        int ame_y_detect = ame_jump_state / CLOCK_PER_JUMP_IMG;
-        if ((ame_y_detect == 0 || ame_y_detect >= 13) && ame_guard == 0) {
+        if ((ame_jump_state == 0 || ame_jump_state >= 13) && ame_guard == 0) {
             engine->play2D("ame/middle_punch.wav");
             if (rand() % 2 == 0) {
                 engine->play2D("gura/gura_fbi.wav");
@@ -1815,7 +1814,6 @@ void gura_move_idleFunc() {
 
 /* diamond idle function */
 void diamond_move_idleFunc() {
-    int ame_y_detect = (int)(ame_jump_state / CLOCK_PER_JUMP_IMG);
     for (int i = 0; i < DIAMOND_FULL; i++) {
         if (diamond_bucket[i][1] != 0.0f) {
             if (diamond_bucket[i][0] < -12.5) {
@@ -1823,7 +1821,7 @@ void diamond_move_idleFunc() {
             }
             else {
                 if (-3.77f <= diamond_bucket[i][0] && diamond_bucket[i][0] <= -2.77f) {
-                    if (diamond_bucket[i][1] == DIAMOND_DOWN && (ame_y_detect == 0 || ame_y_detect >= 13)) {
+                    if (diamond_bucket[i][1] == DIAMOND_DOWN && (ame_jump_state == 0 || ame_jump_state >= 13)) {
                         if (the_world) {
                             score += 2;
                         }
@@ -1833,7 +1831,7 @@ void diamond_move_idleFunc() {
                         engine->play2D("object/coin.wav");
                         diamond_bucket[i][1] = 0.0f;
                     }
-                    else if(diamond_bucket[i][1] == DIAMOND_UP && (2 <= ame_y_detect && ame_y_detect <= 13)) {
+                    else if(diamond_bucket[i][1] == DIAMOND_UP && (2 <= ame_jump_state && ame_jump_state <= 13)) {
                         if (the_world) {
                             score += 2;
                         }
@@ -1919,7 +1917,11 @@ void idleFunc() {
                 ame_run_state_idleFunc();
             }
             else if (ame_state == jump) {
-                ame_jump_state_idleFunc();
+                jump_i++;
+                if (jump_i % CLOCK_PER_JUMP_IMG == 0) {
+                    ame_jump_state_idleFunc();
+                    jump_i = 0;
+                }
             }
             bg_state_idleFunc();
             diamond_move_idleFunc();
