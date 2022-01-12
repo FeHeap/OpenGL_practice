@@ -1460,13 +1460,16 @@ void keyboardArrayInit() {
         keyboardArray[i] = 0;
     }
 }
-const int multi_jump_boundary_early = 8;
-const int multi_jump_boundary_last = 12;
+#define MULTI_JUMP_BOUNDARY_EARLY 8
+#define MULTI_JUMP_BOUNDARY_LAST 12
 void keyboard(unsigned char key, int x, int y) {
     if (start_flag == 1 && stop_flag == 0) {
         switch (key) {
         case ' ':
-            if (ame_state == run) {
+            if (ame_state == jump) {
+                keyboardArray[' '] = 1;
+            }
+            else if (ame_state == run) {
                 if (the_world && rand() % 7 == 1) {
                     engine->play2D("ame/watson_amelia_get_the_fuck_up.wav");
                 }
@@ -1483,9 +1486,6 @@ void keyboard(unsigned char key, int x, int y) {
                 }
                 ame_state = jump;
                 jump_i = 0;
-                keyboardArray[' '] = 1;
-            }
-            else if (ame_state == jump) {
                 keyboardArray[' '] = 1;
             }
             break;
@@ -1561,7 +1561,7 @@ void keyboardUp(unsigned char key, int x, int y) {
 }
 
 void keyboardIdle() {
-    if (keyboardArray[' '] == 1 && multi_jump_boundary_early <= ame_jump_state && ame_jump_state <= multi_jump_boundary_last) {
+    if (keyboardArray[' '] == 1 && MULTI_JUMP_BOUNDARY_EARLY <= ame_jump_state && ame_jump_state <= MULTI_JUMP_BOUNDARY_LAST) {
         ame_jump_state = 4;
     }
 }
