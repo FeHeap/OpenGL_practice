@@ -292,7 +292,7 @@ void kiara_init() {
 }
 
 /* background */
-#define BG_NUM 7
+#define BG_NUM 9
 #define AME_BG_NUM 7
 #define BG_TRANSLATE_UNIT 0.03
 GLuint bg_texture[BG_NUM][2];
@@ -1554,6 +1554,7 @@ void keyboardUp(unsigned char key, int x, int y) {
                     stpm_state = 0;
                 }
             }
+            break;
         default: // pass
             break;
         }
@@ -1626,7 +1627,7 @@ void mouse(int button, int state, int x, int y) {
 }
 void mouse_position_start_idleFunc() {
     static POINT pt;
-    BOOL bReturn = GetCursorPos(&pt); //?脣?皛???雿蔭?郡t
+    BOOL bReturn = GetCursorPos(&pt); // get the position of Cursor
 
     //obtain window size
     float WindowWidth = glutGet(GLUT_WINDOW_WIDTH);
@@ -1636,7 +1637,7 @@ void mouse_position_start_idleFunc() {
     float WindowPosX = glutGet(GLUT_WINDOW_X);
     float WindowPosY = glutGet(GLUT_WINDOW_Y);
 
-    if (bReturn != 0) { //憒??賢??瑁???
+    if (bReturn != 0) { // get the position succrssfully
         if (WindowPosX + WindowWidth / 2 - 85 <= pt.x && pt.x <= WindowPosX + WindowWidth / 2 + 85 && WindowPosY + WindowHeight / 2 - 65 <= pt.y && pt.y <= WindowPosY + WindowHeight / 2 + 65 && sttm_state == 0) {
             engine->play2D("Background/start_button_float.wav");
             sttm_state = 1;
@@ -1651,7 +1652,7 @@ void mouse_position_start_idleFunc() {
 }
 void mouse_position_stop_idleFunc() {
     static POINT pt;
-    BOOL bReturn = GetCursorPos(&pt); //?脣?皛???雿蔭?郡t
+    BOOL bReturn = GetCursorPos(&pt); // get the position of Cursor
 
     //obtain window size
     float WindowWidth = glutGet(GLUT_WINDOW_WIDTH);
@@ -1661,7 +1662,7 @@ void mouse_position_stop_idleFunc() {
     float WindowPosX = glutGet(GLUT_WINDOW_X);
     float WindowPosY = glutGet(GLUT_WINDOW_Y);
 
-    if (bReturn != 0 && menu_state != 3) { //憒??賢??瑁???
+    if (bReturn != 0 && menu_state != 3) { // get the position succrssfully
         if (ame_dead_state == live && stop_flag == 1) {
             if (WindowPosX + WindowWidth * 0.9 <= pt.x && pt.x <= WindowPosX + WindowWidth && WindowPosY + WindowHeight * 0.1 <= pt.y && pt.y <= WindowPosY + WindowHeight * 0.2 && (menu_state == 0 || menu_state == 1)) {
                 menu_state = 1;

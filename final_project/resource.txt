@@ -1,0 +1,34 @@
+[graph]
+<Youtube>
+<walfie gif>
+https://walfiegif.wordpress.com/
+<holo en>
+https://www.youtube.com/channel/UCyl1z3jo3XHR1riLFKG5UAg
+<minecraft>
+https://www.minecraft.net/zh-hant
+<pinterest>
+https://in.pinterest.com/pin/726064771166467512/
+<openGL>
+
+[sound]
+<Ru's piano>
+https://www.youtube.com/watch?v=V8RwHXUtCcw
+<JOJO 的奇妙冒險>
+<DOVA SYM-DROME>
+https://dova-s.jp/bgm/
+https://www.youtube.com/watch?v=kKg-aXVS1YI
+https://www.youtube.com/watch?v=mgRK2Tz5I4k
+<小森平的免費下載音效>
+https://taira-komori.jpn.org/freesoundtw.html
+<holo en>
+https://www.youtube.com/channel/UCyl1z3jo3XHR1riLFKG5UAg
+https://www.youtube.com/channel/UCoSrY_IQQVpmIRZ9Xf-y93g
+https://www.youtube.com/channel/UCHsx4Hqa-1ORjQTh9TYDhww\
+<HAACHAMA Ch 赤井はあと>
+https://www.youtube.com/channel/UC1CfXB_kRs3C-zaeTG3oGyg
+<Microsoft>
+<irrKlang>
+https://www.ambiera.com/irrklang/
+
+[文字]
+<Microsoft>
