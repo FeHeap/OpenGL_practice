@@ -1,4 +1,4 @@
-﻿#include <cstdlib>
+#include <cstdlib>
 #include <cstdio>
 #include <cmath>
 #include <cstring>
@@ -1739,7 +1739,7 @@ void kiara_move_idleFunc() {
         kiara_translate = 7.5 + rand() % 40;
     }
 
-    if (-3.67f < kiara_translate && kiara_translate < -2.87f) {
+    if (-3.87f < kiara_translate && kiara_translate < -3.07f) {
         if ((2 <= ame_jump_state && ame_jump_state <= 13) && ame_guard == 0) {
             engine->play2D("ame/middle_punch.wav");
             engine->play2D("kiara/kiara_tskr.wav");
@@ -1776,7 +1776,7 @@ void gura_move_idleFunc() {
         gura_vector = !gura_vector;
     }
 
-    if (-3.62f < gura_translate && gura_translate < -2.92f) {
+    if (-3.82f < gura_translate && gura_translate < -3.12f) {
         if ((ame_jump_state == 0 || ame_jump_state >= 13) && ame_guard == 0) {
             engine->play2D("ame/middle_punch.wav");
             if (rand() % 2 == 0) {
@@ -1914,6 +1914,8 @@ void bg_state_idleFunc() {
     }
 }
 
+
+#define TIMER_SECOND 15
 void timerIdleFunc(int zero) {
     if (start_flag == 1) {
         if (stop_flag == 0) {
@@ -1962,7 +1964,7 @@ void timerIdleFunc(int zero) {
     }
 
     glutPostRedisplay();
-    glutTimerFunc(1, timerIdleFunc, 0);
+    glutTimerFunc(TIMER_SECOND, timerIdleFunc, 0);
 }
 
 /* restart process */
@@ -1993,7 +1995,7 @@ int main(int argc, char** argv)
     glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyboardUp);
     glutMouseFunc(mouse);
-    glutTimerFunc(1, timerIdleFunc, 0);
+    glutTimerFunc(TIMER_SECOND, timerIdleFunc, 0);
     glutMainLoop();
     return 0;
 }
