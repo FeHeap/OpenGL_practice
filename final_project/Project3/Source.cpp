@@ -24,7 +24,7 @@
 
 
 // sleep clock(int)
-#define SLEEP_CLOCK 0 //15?
+//#define SLEEP_CLOCK 0 // Need?
 
 // start up the engine
 irrklang::ISoundEngine * engine = irrklang::createIrrKlangDevice();
@@ -1914,8 +1914,7 @@ void bg_state_idleFunc() {
     }
 }
 
-void idleFunc() {
-    Sleep(SLEEP_CLOCK);
+void timerIdleFunc(int zero) {
     if (start_flag == 1) {
         if (stop_flag == 0) {
             if (ame_state == run) {
@@ -1963,6 +1962,7 @@ void idleFunc() {
     }
 
     glutPostRedisplay();
+    glutTimerFunc(1, timerIdleFunc, 0);
 }
 
 /* restart process */
@@ -1993,8 +1993,7 @@ int main(int argc, char** argv)
     glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyboardUp);
     glutMouseFunc(mouse);
-
-    glutIdleFunc(idleFunc);
+    glutTimerFunc(1, timerIdleFunc, 0);
     glutMainLoop();
     return 0;
 }
